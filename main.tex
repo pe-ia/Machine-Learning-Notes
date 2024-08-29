@@ -1,0 +1,134 @@
+\documentclass{article}
+
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{bbm}
+
+\begin{document}
+
+\tableofcontents
+
+\pagebreak
+
+\section{Introduction to Machine Learning}
+
+\begin{itemize}
+    \item Machine learning algorithms are statistical algorithms that can learn from data and generalize to unseen data, thus performing tasks without explicit instructions.
+    \item In supervised methods we know the outcome Y for each input X; often, the task is to predict Y based on X.
+    \item In unsupervised methods we have only the inputs X. Typical tasks are about finding structure in data.
+    \begin{itemize}
+        \item For example, it can be used to find "clusters".
+    \end{itemize}
+    \item X is often known as:
+    \begin{itemize}
+        \item Input
+        \item Feature
+        \item Predictor
+        \item Covariate
+        \item Independent variable
+    \end{itemize}
+    \item Y is often known as:
+    \begin{itemize}
+        \item Output
+        \item Outcome
+        \item Response
+        \item Target variable
+        \item Dependent variable
+    \end{itemize}
+    \item Supervised problems are often referred to as either:
+    \begin{itemize}
+        \item \textbf{Regression}: The outcome Y is quantitative (typically $\mathbb{R}$)s
+        \item \textbf{Classification}: The outcome Y is categorical
+    \end{itemize}
+\end{itemize}
+
+\pagebreak
+
+\section{Regression}
+
+\subsection{Regression Setting}
+
+Assume a functional relationship between $X$ and $Y$ as
+
+\begin{align*}
+    Y=f(X)+\varepsilon
+\end{align*}
+
+The noise $\varepsilon$:
+\begin{itemize}
+    \item Has mean zero
+    \item Has constant variance
+    \item Is generally uncorrelated between observations
+\end{itemize}
+
+Formulation in terms of the conditional mean of $Y$ given features $X$:
+
+\begin{align*}
+    \mathbb{E}(Y|X)=f(X)
+\end{align*}
+
+A natural prediction $\hat{Y}$ for a new observation with input $X_0$ is:
+
+\begin{align*}
+    \hat{Y}=\mathbb{E}(Y|X_0)=f(X_0)
+\end{align*}
+
+\subsection{Linear regression - general formulation}
+
+For $p$ features and an intercept term the model is:
+
+\begin{align*}
+    \mathbf{Y}=\mathbf{X}\beta+\varepsilon
+\end{align*}
+\begin{align*}
+    \begin{bmatrix}
+    y_1 \\
+    \vdots \\
+    y_n
+    \end{bmatrix}
+    =
+    \begin{bmatrix}
+    1 & x_{i1} & \hdots & x_{ip} \\
+    \vdots & \vdots & \vdots & \vdots \\
+    1 & x_{i1} & \hdots & x_{ip} \\
+    \end{bmatrix}
+    \begin{bmatrix}
+    \beta_1 \\
+    \vdots \\
+    \beta_p
+    \end{bmatrix}
+    +
+    \begin{bmatrix}
+    \varepsilon_1 \\
+    \vdots \\
+    \varepsilon_n
+    \end{bmatrix}
+\end{align*}
+
+\subsection{Categorical features}
+
+When a variable is not continuous, \textit{dummy variables} are used, referred to as \textit{one-hot encoding} in ML
+
+Example, for a binary variable:
+
+\begin{align*}
+    Y=\beta_0+\beta_1\mathbbm{1}_{X=B}+\varepsilon
+\end{align*}
+
+\begin{itemize}
+    \item $\beta_0$ is the mean in group $A$
+    \item $\beta_1$ is the difference in group means between groups $B$ and $A$
+\end{itemize}
+
+\pagebreak
+
+\subsection{Complex functional relationships}
+
+When $Y$ has nonlinear term, for example: $x_1x_2$
+We can define $x_3=x_1x_2$ to obtain:
+
+\begin{align*}
+    Y=\beta_0+\beta_1x_1+\beta_2x_2+\beta_3x_3+\epsilon
+\end{align*}
+
+\end{document}
