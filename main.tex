@@ -131,4 +131,94 @@ We can define $x_3=x_1x_2$ to obtain:
     Y=\beta_0+\beta_1x_1+\beta_2x_2+\beta_3x_3+\epsilon
 \end{align*}
 
+
+\subsection{Estimating parameters $\beta$ and $\sigma_2$}
+
+It's advisable to make scatter plots first, before estimating parameters.
+
+\subsubsection{RSS}
+
+To estimate $\beta$, the least squares method is used - it finds $\beta$ that minimises the sum of squared errors/residuals.
+
+\begin{align*}
+    RSS = \sum_{i=1}^n (y_i-\hat{y})^2=\sum_{i=1}^n(y_i-\boldsymbol{x}_i^T\boldsymbol{\beta})^2
+\end{align*}
+
+In closed matrix form, the solution to find $\hat{\beta}$ is:
+
+\begin{align*}
+    \hat{\beta}=(\boldsymbol{X}^T\boldsymbol{X})^{-1}\boldsymbol{X}^T\boldsymbol{Y}
+\end{align*}
+
+And thus:
+
+\begin{align*}
+    \hat{\boldsymbol{Y}}=\boldsymbol{X}\hat{\beta}=\boldsymbol{X}(\boldsymbol{X}^T\boldsymbol{X})^{-1}\boldsymbol{X}^T\boldsymbol{Y}
+\end{align*}
+
+Note: if $p\geq n$, this won't work.
+
+\subsubsection{MLE}
+
+For an individual $y_i$ it is:
+
+\begin{align*}
+    p_Y(y_i|X)=\frac{1}{(2\pi\sigma^2)^{1/2}}
+    \cdot
+    e^{-\frac{1}{2}\frac{(y_i-x_i^T\beta)^2}{\sigma^2}}
+\end{align*}
+
+For all $y_i$ it is:
+
+\begin{align*}
+    \prod_{i=1}^n p_Y(y_i|X)
+\end{align*}
+
+To simplify the working, the log-likelihood function is derived:
+
+\begin{align*}
+    \ell\left(\beta, \sigma^{2}\right)=-\frac{1}{2}\left(n \log \sigma^{2}+\frac{1}{\sigma^{2}} \sum_{i=1}^{n}\left(y_{i}-\boldsymbol{x}_{i}^{T} \boldsymbol{\beta}\right)^{2}\right)
+\end{align*}
+
+$\beta$ is fixed at $\hat{\beta}$, and $\ell$ is minimised giving:
+
+\begin{align*}
+  \hat{\sigma^2}=\frac{1}{n}\sum_{i=1}{n}(y_i\boldsymbol{x}_i^T\hat{\beta})^2  
+\end{align*}
+
+If $n$ is not large, it's normalised by $n-p$ instead of $n$ for unbiasedness.
+
+\subsubsection{Confidence and Prediction intervals}
+
+When parameters are estimated for a model, confidence intervals are calculated for the coefficients, and prediction intervals are calculated for individual values.
+
+Prediction intervals for $\hat{Y}$ are always wider than the confidence interval for $\hat{f}(x)$.
+
+\subsection{Building models}
+
+\begin{enumerate}
+    \item Choose features for model
+    \item Scatter plot each feature
+    \item Consider feature transformations and interactions
+    \item Fit the model
+    \item Check and scrutinize the model
+\end{enumerate}
+
+\subsubsection{Testing models}
+
+\begin{itemize}
+    \item Test if coefficients are zero - feature has no impact if it it's coefficient is
+    \item Use F-test and AIC/BIC to compare to other models with other features
+\end{itemize}
+
+\subsubsection{Model selection}
+
+\begin{itemize}
+    \item \textbf{Forward selection:} Start by including no/few variables
+    \item \textbf{Backward selection:} Start by including all/many variables
+    \item \textbf{Alternating:} Alternate between forward and backward selection
+\end{itemize}
+
+\pagebreak
+
 \end{document}
