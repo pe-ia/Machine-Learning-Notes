@@ -44,181 +44,193 @@
 
 \pagebreak
 
-\section{Regression}
+\section{Chapter 3: Linear Regression}
 
-\subsection{Regression Setting}
-
-Assume a functional relationship between $X$ and $Y$ as
-
-\begin{align*}
-    Y=f(X)+\varepsilon
-\end{align*}
-
-The noise $\varepsilon$:
+\subsection{3.1 Simple Linear Regression}
+Simple linear regression models the relationship between a single predictor \(X\) and a response \(Y\) using a linear function:
+\[
+Y = \beta_0 + \beta_1 X + \epsilon,
+\]
+where:
 \begin{itemize}
-    \item Has mean zero
-    \item Has constant variance
-    \item Is generally uncorrelated between observations
+    \item \(\beta_0\) is the intercept,
+    \item \(\beta_1\) is the slope of the line,
+    \item \(\epsilon\) is the error term, which is assumed to be normally distributed with mean 0.
+\end{itemize}
+The coefficients \(\beta_0\) and \(\beta_1\) are estimated using the least squares criterion, which minimizes the residual sum of squares (RSS):
+\[
+RSS = \sum_{i=1}^{n} (y_i - \hat{y}_i)^2 = \sum_{i=1}^{n} (y_i - (\beta_0 + \beta_1 x_i))^2.
+\]
+
+\textbf{Interpretation:} 
+\begin{itemize}
+    \item \(\beta_1\) represents the average change in the response \(Y\) associated with a one-unit change in the predictor \(X\).
+    \item For example, in predicting sales based on TV advertising spend, \(\beta_1\) would indicate how much sales increase, on average, for each additional unit of advertising expenditure on TV.
 \end{itemize}
 
-Formulation in terms of the conditional mean of $Y$ given features $X$:
-
-\begin{align*}
-    \mathbb{E}(Y|X)=f(X)
-\end{align*}
-
-A natural prediction $\hat{Y}$ for a new observation with input $X_0$ is:
-
-\begin{align*}
-    \hat{Y}=\mathbb{E}(Y|X_0)=f(X_0)
-\end{align*}
-
-\subsection{Linear regression - general formulation}
-
-For $p$ features and an intercept term the model is:
-
-\begin{align*}
-    \mathbf{Y}=\mathbf{X}\beta+\varepsilon
-\end{align*}
-\begin{align*}
-    \begin{bmatrix}
-    y_1 \\
-    \vdots \\
-    y_n
-    \end{bmatrix}
-    =
-    \begin{bmatrix}
-    1 & x_{i1} & \hdots & x_{ip} \\
-    \vdots & \vdots & \vdots & \vdots \\
-    1 & x_{i1} & \hdots & x_{ip} \\
-    \end{bmatrix}
-    \begin{bmatrix}
-    \beta_1 \\
-    \vdots \\
-    \beta_p
-    \end{bmatrix}
-    +
-    \begin{bmatrix}
-    \varepsilon_1 \\
-    \vdots \\
-    \varepsilon_n
-    \end{bmatrix}
-\end{align*}
-
-\subsection{Categorical features}
-
-When a variable is not continuous, \textit{dummy variables} are used, referred to as \textit{one-hot encoding} in ML
-
-Example, for a binary variable:
-
-\begin{align*}
-    Y=\beta_0+\beta_1\mathbbm{1}_{X=B}+\varepsilon
-\end{align*}
-
+\subsection{3.2 Multiple Linear Regression}
+Multiple linear regression extends the simple linear regression model to include multiple predictors:
+\[
+Y = \beta_0 + \beta_1 X_1 + \beta_2 X_2 + \ldots + \beta_p X_p + \epsilon.
+\]
+Here:
 \begin{itemize}
-    \item $\beta_0$ is the mean in group $A$
-    \item $\beta_1$ is the difference in group means between groups $B$ and $A$
+    \item Each \(\beta_j\) represents the change in \(Y\) associated with a one-unit change in \(X_j\), holding all other predictors constant.
+    \item The model can be written in matrix notation as:
+    \[
+    Y = X\beta + \epsilon,
+    \]
+    where \(Y\) is an \(n \times 1\) vector of responses, \(X\) is an \(n \times (p+1)\) matrix of predictors (including a column of ones for the intercept), \(\beta\) is a \((p+1) \times 1\) vector of coefficients, and \(\epsilon\) is an \(n \times 1\) vector of errors.
 \end{itemize}
 
-\pagebreak
+\textbf{Example: Advertising Data.} Consider a multiple regression model for predicting sales using TV, radio, and newspaper advertising budgets:
+\[
+\text{sales} = \beta_0 + \beta_1 \cdot \text{TV} + \beta_2 \cdot \text{radio} + \beta_3 \cdot \text{newspaper} + \epsilon.
+\]
+The estimated coefficients \(\beta_1, \beta_2,\) and \(\beta_3\) help to understand the individual contribution of each type of advertising while accounting for the other types.
 
-\subsection{Complex functional relationships}
+\subsection{3.3 Other Considerations in the Regression Model}
+\textbf{Qualitative Predictors:} 
+Qualitative or categorical predictors can be incorporated into regression models by creating dummy variables. For example, if the predictor is a categorical variable 'region' with three levels (East, West, North), we can introduce two dummy variables:
+\[
+\text{region}_1 = 
+\begin{cases} 
+1 & \text{if East} \\
+0 & \text{otherwise}
+\end{cases}, \quad 
+\text{region}_2 = 
+\begin{cases} 
+1 & \text{if West} \\
+0 & \text{otherwise}
+\end{cases}.
+\]
+Incorporating these into the regression model allows us to estimate different intercepts for each region.
 
-When $Y$ has nonlinear term, for example: $x_1x_2$
-We can define $x_3=x_1x_2$ to obtain:
+\textbf{Interaction Terms:}
+Interaction terms allow modeling situations where the effect of one predictor depends on another. For example, if we believe that the effect of TV advertising on sales depends on the level of radio advertising, we can include an interaction term:
+\[
+\text{sales} = \beta_0 + \beta_1 \cdot \text{TV} + \beta_2 \cdot \text{radio} + \beta_3 \cdot (\text{TV} \times \text{radio}) + \epsilon.
+\]
 
-\begin{align*}
-    Y=\beta_0+\beta_1x_1+\beta_2x_2+\beta_3x_3+\epsilon
-\end{align*}
-
-
-\subsection{Estimating parameters $\beta$ and $\sigma_2$}
-
-It's advisable to make scatter plots first, before estimating parameters.
-
-\subsubsection{RSS}
-
-To estimate $\beta$, the least squares method is used - it finds $\beta$ that minimises the sum of squared errors/residuals.
-
-\begin{align*}
-    RSS = \sum_{i=1}^n (y_i-\hat{y})^2=\sum_{i=1}^n(y_i-\boldsymbol{x}_i^T\boldsymbol{\beta})^2
-\end{align*}
-
-In closed matrix form, the solution to find $\hat{\beta}$ is:
-
-\begin{align*}
-    \hat{\beta}=(\boldsymbol{X}^T\boldsymbol{X})^{-1}\boldsymbol{X}^T\boldsymbol{Y}
-\end{align*}
-
-And thus:
-
-\begin{align*}
-    \hat{\boldsymbol{Y}}=\boldsymbol{X}\hat{\beta}=\boldsymbol{X}(\boldsymbol{X}^T\boldsymbol{X})^{-1}\boldsymbol{X}^T\boldsymbol{Y}
-\end{align*}
-
-Note: if $p\geq n$, this won't work.
-
-\subsubsection{MLE}
-
-For an individual $y_i$ it is:
-
-\begin{align*}
-    p_Y(y_i|X)=\frac{1}{(2\pi\sigma^2)^{1/2}}
-    \cdot
-    e^{-\frac{1}{2}\frac{(y_i-x_i^T\beta)^2}{\sigma^2}}
-\end{align*}
-
-For all $y_i$ it is:
-
-\begin{align*}
-    \prod_{i=1}^n p_Y(y_i|X)
-\end{align*}
-
-To simplify the working, the log-likelihood function is derived:
-
-\begin{align*}
-    \ell\left(\beta, \sigma^{2}\right)=-\frac{1}{2}\left(n \log \sigma^{2}+\frac{1}{\sigma^{2}} \sum_{i=1}^{n}\left(y_{i}-\boldsymbol{x}_{i}^{T} \boldsymbol{\beta}\right)^{2}\right)
-\end{align*}
-
-$\beta$ is fixed at $\hat{\beta}$, and $\ell$ is minimised giving:
-
-\begin{align*}
-  \hat{\sigma^2}=\frac{1}{n}\sum_{i=1}{n}(y_i\boldsymbol{x}_i^T\hat{\beta})^2  
-\end{align*}
-
-If $n$ is not large, it's normalised by $n-p$ instead of $n$ for unbiasedness.
-
-\subsubsection{Confidence and Prediction intervals}
-
-When parameters are estimated for a model, confidence intervals are calculated for the coefficients, and prediction intervals are calculated for individual values.
-
-Prediction intervals for $\hat{Y}$ are always wider than the confidence interval for $\hat{f}(x)$.
-
-\subsection{Building models}
-
-\begin{enumerate}
-    \item Choose features for model
-    \item Scatter plot each feature
-    \item Consider feature transformations and interactions
-    \item Fit the model
-    \item Check and scrutinize the model
-\end{enumerate}
-
-\subsubsection{Testing models}
-
+\textbf{Extensions and Potential Problems:}
 \begin{itemize}
-    \item Test if coefficients are zero - feature has no impact if it it's coefficient is
-    \item Use F-test and AIC/BIC to compare to other models with other features
+    \item \textbf{Polynomial Regression:} Adds polynomial terms to the regression model to capture non-linear relationships.
+    \item \textbf{Potential Issues:} Multicollinearity (high correlation among predictors), non-linearity of relationships, and outliers can affect model estimates.
 \end{itemize}
 
-\subsubsection{Model selection}
 
+\section{Bias and Variance}
+
+Assuming $Y=f(X_0)+\varepsilon$, where:
 \begin{itemize}
+    \item $\mathbb{E}(\varepsilon)=0$
+    \item $\varepsilon$ is independent of $X_0$
+\end{itemize}
+When fitting $\hat{f}$ with a dataset of $N$ observations ($X$,$Y$)
+\begin{itemize}
+    \item $N$ observations = \textit{training data}
+    \item Algorithm for fitting $\hat{f}$ = \textit{learner}
+    \item Applying learner to the training data = \textit{training}
+\end{itemize}
+Given training data and a chosen model framework, we want to minimize \textit{expected test MSE}: 
+\begin{align*}
+    \mathbb{E}[(Y_0-\hat{f}(X_0))^2]
+\end{align*}
+The expected test MSE at $x_0$ is:
+\begin{align*}
+    \mathbb{E}(Y_0-\hat{f}(x_0))=\mathbb{E}(\hat{f}(x_0)-\mathbb{E}(\hat{f}(x_0)))^2+(\mathbb{E}(\hat{f}(x_0))-f(x_0))^2+\text{Var}(\varepsilon)
+\end{align*}
+Where:
+\begin{itemize}
+    \item $\mathbb{E}(\hat{f}(x_0)-\mathbb{E}(\hat{f}(x_0)))^2$ is the Variance of $\hat{f}(x_0)$, the amount by which $\hat{f}$ would change if it were estimated with a different training data set
+    \item $\mathbb{E}(\hat{f}(x_0))-f(x_0)$ is the Bias of $\hat{f}(X_0)$, the expected deviation of the model prediction from the true value - a.k.a., the inability to capture the true relationship
+\end{itemize}
+In the MSE, all 3 terms are non-negative, so any large term = large MSE; however, variance and bias are both \textit{reducible errors}.
+
+\subsection{Validation sets}
+
+If we wish to use MSE for model building - selecting features and tuning hyperparameters - we create a validation set, separate from training/testing set, for estimating the MSE.
+
+\subsubsection{Leave-one-out crossvalidation (LOOCV)}
+
+Create $n$ different partitions (where $n$ is amount of data points), with just one validation data point in each.
+For each partition, $i$, the test MSE is $(y_i-\hat{y_i})^2$.
+The LOOCV estimate for the test MSE is:
+\begin{align*}
+    \text{MSE} = \frac{1}{n}\sum_{i=n}^{n}(y_i-\hat{y_i})^2
+\end{align*}
+Downside: This is computationally expensive, requiring $n$ fits.
+
+\subsubsection{$k$-fold crossvalidation}
+
+Create $k$ different partitions ("folds"), in each $1/k$ of the data is for validation. Randomly shuffle data beforehand if it's ordered.
+
+For each fold, compute $\text{MSE}_i$. Then, average:
+\begin{align*}
+    \frac{1}{k}\sum_{i=1}^{k}\text{MSE}_k
+\end{align*}
+Downside: Non-deterministic.
+
+\section{Regression with many features}
+
+Problem:
+\begin{itemize}
+    \item When features $p \approx n$, not enough data to estimate the regression curve well.
+    \item When $p > n$, MLE doesn't exist.
+\end{itemize}
+
+Solutions:
+\begin{itemize}
+    \item Model selection
+    \item Shrinkage (regularisation)
+\end{itemize}
+
+\subsection{Model selection}
+
+As mentioned in 2.6.2, several methods:
+\begin{itemize}
+    \item \textbf{Best subset:} Self-explanitory, expensive
+    \begin{itemize}
+        \item Genetic algorithm can be used as heuristic
+    \end{itemize}
     \item \textbf{Forward selection:} Start by including no/few variables
     \item \textbf{Backward selection:} Start by including all/many variables
     \item \textbf{Alternating:} Alternate between forward and backward selection
 \end{itemize}
 
-\pagebreak
+For comparing models, AIC, BIC, or test error can be used.
+
+\subsubsection{AIC and BIC}
+
+\begin{align*}
+    \text{AIC}=-2\log\hat{L}+2p
+\end{align*}
+\begin{align*}
+    \text{BIC}=-2\log\hat{L}+p \log n
+\end{align*}
+Where $p$ is the number of parameters, $n$ is the number of features, and d $\hat{L}$ is the maximised likelihood function. Smaller = better.
+
+\subsubsection{Stepwise selection}
+
+\textbf{Backwards:}
+\begin{enumerate}
+    \item Make initial model, with all/many features
+    \item Iterative remove the least relevant feature (largest drop in AIC)
+    \item Stop if removing a feature does not drop AIC significantly
+\end{enumerate}
+
+\textbf{Forwards:}
+\begin{enumerate}
+    \item Make initial model, with only intercept/few features
+    \item Iterative add the most relevant feature (largest drop in AIC)
+    \item Stop if adding a feature does not drop AIC significantly
+\end{enumerate}
+
+\subsubsection{Notes on automatic model selection}
+
+\begin{itemize}
+    \item One may wish to keep certain variables, even if they are not significant, if they are relevant in some other way, such as to the research question.
+    \item One may wish to remove certain variables, even if they are significant, if they complicate interpretations.
+\end{itemize}
 
 \end{document}
