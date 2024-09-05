@@ -233,4 +233,64 @@ Where $p$ is the number of parameters, $n$ is the number of features, and d $\ha
     \item One may wish to remove certain variables, even if they are significant, if they complicate interpretations.
 \end{itemize}
 
+\subsection{Shrinkage}
+
+Shrinkage helps estimate coefficients $\beta$ in a constrained way, keeping them small. Doing so reduces coefficient variance and can improve the fit.
+
+\subsubsection{Ridge regression}
+
+Ridge regression minimizes the residual sum of squares, but adds a penalty term proportional to the squared magnitude of the coefficients:
+
+\begin{align*}
+    \hat{\beta}_\text{ridge} = \underset{\beta}{\mathrm{argmin}} \left\{ \sum_{i=1}^{n} (y_i - \beta_0 - \sum_{j=1}^{p} \beta_j x_{ij})^2 + \lambda \sum_{j=1}^{p} \beta_j^2 \right\}
+\end{align*}
+
+Where:
+\begin{itemize}
+    \item $\lambda \geq 0$ is a tuning parameter that controls the strength of the penalty.
+    \item A larger $\lambda$ leads to more shrinkage and smaller coefficients.
+    \item Ridge regression shrinks coefficients towards zero but never sets them exactly to zero.
+    \item $\text{argmin}$ (short for "argument of the minimum") finds the value of $\beta$ that minimizes the function inside the curly braces. In this case, it finds the coefficients that minimize the sum of squared errors plus the penalty term.
+\end{itemize}
+
+\subsubsection{Lasso}
+
+Lasso (Least Absolute Shrinkage and Selection Operator) regression also minimizes the residual sum of squares, but it adds a penalty term proportional to the absolute value of the coefficients:
+
+\begin{align*}
+    \hat{\beta}^\text{lasso} = \underset{\beta}{\mathrm{argmin}} \left\{ \sum_{i=1}^{n} (y_i - \beta_0 - \sum_{j=1}^{p} \beta_j x_{ij})^2 + \lambda \sum_{j=1}^{p} |\beta_j| \right\}
+\end{align*}
+
+Where:
+\begin{itemize}
+    \item $\lambda \geq 0$ is a tuning parameter that controls the strength of the penalty.
+    \item Lasso encourages sparsity, meaning that some coefficients are set exactly to zero for sufficiently large $\lambda$.
+    \item Lasso can be used for both regularization and feature selection.
+\end{itemize}
+
+\subsubsection{Lasso vs Ridge}
+
+\textbf{TLDR}: Ridge scales everything down, while Lasso also gets rid of small enough coefficients.
+
+\begin{itemize}
+    \item \textbf{Ridge:}
+    \begin{itemize}
+        \item Ridge regression applies an $L_2$ penalty, which shrinks the coefficients continuously towards zero.
+        \item It does not perform feature selection as it keeps all coefficients, though they may be very small.
+    \end{itemize}
+    
+    \item \textbf{Lasso:}
+    \begin{itemize}
+        \item Lasso applies an $L_1$ penalty, which shrinks some coefficients to zero exactly.
+        \item It performs both regularization and feature selection by setting some coefficients to zero.
+    \end{itemize}
+    
+    \item \textbf{Choosing between them:}
+    \begin{itemize}
+        \item Lasso is preferred when you suspect many features are irrelevant and need automatic feature selection.
+        \item Ridge is preferred when all features are potentially relevant but need regularization to prevent overfitting.
+        \item Elastic net is a compromise between Ridge and Lasso, applying a combination of $L_1$ and $L_2$ penalties.
+    \end{itemize}
+\end{itemize}
+
 \end{document}
