@@ -44,9 +44,9 @@
 
 \pagebreak
 
-\section{Chapter 3: Linear Regression}
+\section{Linear Regression}
 
-\subsection{3.1 Simple Linear Regression}
+\subsection{Simple Linear Regression}
 Simple linear regression models the relationship between a single predictor \(X\) and a response \(Y\) using a linear function:
 \[
 Y = \beta_0 + \beta_1 X + \epsilon,
@@ -68,7 +68,7 @@ RSS = \sum_{i=1}^{n} (y_i - \hat{y}_i)^2 = \sum_{i=1}^{n} (y_i - (\beta_0 + \bet
     \item For example, in predicting sales based on TV advertising spend, \(\beta_1\) would indicate how much sales increase, on average, for each additional unit of advertising expenditure on TV.
 \end{itemize}
 
-\subsection{3.2 Multiple Linear Regression}
+\subsection{Multiple Linear Regression}
 Multiple linear regression extends the simple linear regression model to include multiple predictors:
 \[
 Y = \beta_0 + \beta_1 X_1 + \beta_2 X_2 + \ldots + \beta_p X_p + \epsilon.
@@ -291,6 +291,208 @@ Where:
         \item Ridge is preferred when all features are potentially relevant but need regularization to prevent overfitting.
         \item Elastic net is a compromise between Ridge and Lasso, applying a combination of $L_1$ and $L_2$ penalties.
     \end{itemize}
+\end{itemize}
+
+\section{Classification with Logistic Regression}
+
+\begin{itemize}
+    \item Logistic regression seeks to:
+    \begin{itemize}
+        \item Model the probability of an event occurring depending on the values of the independent variables, which can be categorical or numerical
+        \item Estimate the probability that and vent occurs for a randomly selected observation versus the probability that the event does not occur
+        \item Predict the effect of a series of variables on a binary response (dependent) variable
+        \item Classify observations by estimating the probability that an observation is in a particular category
+    \end{itemize}
+    \item Binary data does not have a normal distribution, which is needed for linear regression
+    \item For logistic regression, we use the $\chi^2$-squared test instead of $F$-test
+\end{itemize}
+
+\subsection{Odds}
+
+\begin{itemize}
+    \item $\text{odds}=\frac{P(\text{occurring})}{P(\text{not occurring})}=\frac{p}{1-p}$
+    \item $p=\frac{e^{\log(\text{odds})}}{1+e^{\log(\text{odds})}}$
+    \item $\text{odds ratio}=\frac{\text{odds}_1}{\text{odds}_0}$ for two events with probabilities $p_0$ and $p_1$
+    \item In logistic regression for an independent variable, the odds ratio represents how the odds change with a 1 unit increase in the variable, holding all other variables constant
+    \item The odds ratio holds constant for the entire range of the variable
+\end{itemize}
+
+\subsection{Logit}
+
+\begin{itemize}
+    \item The dependent variable in logistic regression follows the Bernoulli distribution having an unknown probability $p$
+    \item In logistic regression we are estimating an unknown $p$ for any given linear combination of independent variables. This estimate is $\hat{p}$
+    \item We need to link our independent variables to the Bernoulli distribution; that link is called the logit
+    \item Logit - the natural log of the odds ratio - maps linear combinations of variables onto the Bernoulli probability distribution with a domain from 0 to 1
+    \item $\text{logit}(p)=\ln(\text{odds})=\ln(\frac{p}{1-p})=\ln(p)-\ln(1-p)$
+    \item $\text{logit}$ is undefined at $p=0$ and $p=1$
+    \item The logit function runs from 0 to 1 along the x-axis, not the y-axis. This we use inverse logit
+    \item $\text{logit}^{-1}(\alpha)=\mu_{y|x}=\frac{1}{1+e^{-\alpha}}=\frac{e^{\alpha}}{1+e^{\alpha}}$
+    \item The logit is equivalent to a linear function of the independent variables. The antilog of the logit function allows us to find the estimated regression equation
+    \item $\text{logit}(p)=\ln(\frac{p}{1-p})=\beta_0+\beta_1x_1$ $\Rightarrow$ $\frac{p}{1-p}=e^{b_0+b_1 x_1}$ $\Rightarrow \dots \Rightarrow$ $\hat{p}=\frac{e^{b_0+b_1 x_1}}{1 + e^{b_0+b_1 x_1}}$, the estimated regression equation
+\end{itemize}
+
+\subsection{Estimating the Probability}
+
+\begin{itemize}
+    \item Logistic regression uses Maximum Likelihood Estimation (MLE) to estimate the parameters $\beta_0$ and $\beta_1$
+    \item MLE seeks to maximize the likelihood function, which measures the probability of observing the given sample data
+\end{itemize}
+
+\subsubsection{Likelihood and Log-Likelihood}
+
+\begin{itemize}
+    \item The likelihood function $L(\beta_0, \beta_1 \mid y, x)$ is the joint probability of observing the given sample data as a function of the parameters $\beta_0$ and $\beta_1$
+    \item For a binary outcome $y_i \in \{0,1\}$ with probability $p_i$ for $y_i=1$ and $(1-p_i)$ for $y_i=0$, the likelihood function for $n$ observations is:
+    \[
+    L(\beta_0, \beta_1) = \prod_{i=1}^{n} p_i^{y_i} (1-p_i)^{1-y_i}
+    \]
+    \item The log-likelihood function is the natural logarithm of the likelihood function:
+    \[
+    \ell(\beta_0, \beta_1) = \ln(L(\beta_0, \beta_1)) = \sum_{i=1}^{n} \left[ y_i \ln(p_i) + (1-y_i) \ln(1-p_i) \right]
+    \]
+    \item The log-likelihood function is easier to maximize because it converts the product of probabilities into a sum, which is mathematically simpler to handle
+\end{itemize}
+
+\subsubsection{Maximum Likelihood Estimation (MLE)}
+
+\begin{itemize}
+    \item MLE involves finding the parameter values $\beta_0$ and $\beta_1$ that maximize the log-likelihood function
+    \item This is often done using iterative numerical optimization techniques, such as the Newton-Raphson method or gradient descent. There is no direct method like with gaussian (normal) models
+    \item The estimated parameters $\hat{\beta}_0$ and $\hat{\beta}_1$ maximize the likelihood of observing the sample data, providing the best fit for the logistic regression model
+\end{itemize}
+
+\subsection{Multiple Logistic Regression}
+
+\begin{itemize}
+    \item Logistic regression can be extended to handle multiple predictors to model the probability of a binary outcome.
+    \item The logistic regression model for multiple predictors takes the form:
+    \[
+    \log \left(\frac{p(X)}{1-p(X)}\right) = \beta_0 + \beta_1 X_1 + \cdots + \beta_p X_p
+    \]
+    \item This can be rewritten to give the estimated probability:
+    \[
+    p(X) = \frac{e^{\beta_0 + \beta_1 X_1 + \cdots + \beta_p X_p}}{1 + e^{\beta_0 + \beta_1 X_1 + \cdots + \beta_p X_p}}
+    \]
+    \item Each coefficient $\beta_i$ represents the change in the log-odds of the response per unit increase in the corresponding predictor $X_i$, holding all other predictors constant.
+\end{itemize}
+
+\subsection{Coefficients and Interpretation of Results}
+
+\begin{itemize}
+    \item The coefficients in a logistic regression model indicate the effect of each predictor on the log-odds of the outcome, holding other variables constant.
+    \item A positive coefficient increases the odds of the event, while a negative coefficient decreases the odds.
+    \item However, when predictors are correlated (confounding), their individual effects may appear different when considered alone versus together, potentially leading to misleading interpretations.
+    \item Proper interpretation requires understanding both the individual and combined effects of predictors on the response.
+\end{itemize}
+
+\subsubsection{Making Predictions}
+
+\begin{itemize}
+    \item Using the logistic regression equation, we can predict the probability of an event occurring for a given set of predictor values.
+    \item For example, for a given set of predictor values $X = (X_1, \ldots, X_p)$, the predicted probability of the event is:
+    \[
+    \hat{p}(X) = \frac{e^{\beta_0 + \beta_1 X_1 + \cdots + \beta_p X_p}}{1 + e^{\beta_0 + \beta_1 X_1 + \cdots + \beta_p X_p}}
+    \]
+\end{itemize}
+
+\subsection{Multinomial Logistic Regression}
+
+\begin{itemize}
+    \item Multinomial logistic regression extends binary logistic regression to classify a response variable with more than two classes.
+    \item For $K$ classes, we select one as the baseline (e.g., class $K$), and model the probabilities for the other classes as:
+    \[
+    \operatorname{Pr}(Y=k \mid X=x)=\frac{e^{\beta_{k0}+\beta_{k1} x_1 + \cdots + \beta_{kp} x_p}}{1 + \sum_{l=1}^{K-1} e^{\beta_{l0} + \beta_{l1} x_1 + \cdots + \beta_{lp} x_p}}
+    \]
+    for $k = 1, \ldots, K-1$, with the baseline class:
+    \[
+    \operatorname{Pr}(Y=K \mid X=x)=\frac{1}{1 + \sum_{l=1}^{K-1} e^{\beta_{l0} + \beta_{l1} x_1 + \cdots + \beta_{lp} x_p}}
+    \]
+    \item The log odds for class $k$ versus the baseline $K$ is:
+    \[
+    \log \left(\frac{\operatorname{Pr}(Y=k \mid X=x)}{\operatorname{Pr}(Y=K \mid X=x)}\right) = \beta_{k0} + \beta_{k1} x_1 + \cdots + \beta_{kp} x_p
+    \]
+    \item Coefficients are interpreted in terms of log odds ratios relative to the baseline class. A one-unit increase in $X_j$ leads to a $\beta_{kj}$ increase in the log odds of class $k$ versus the baseline.
+\end{itemize}
+
+\subsubsection{Softmax Coding}
+
+\begin{itemize}
+    \item In softmax coding, no baseline class is chosen, and probabilities for all $K$ classes are modeled symmetrically:
+    \[
+    \operatorname{Pr}(Y=k \mid X=x)=\frac{e^{\beta_{k0}+\beta_{k1} x_1 + \cdots + \beta_{kp} x_p}}{\sum_{l=1}^{K} e^{\beta_{l0} + \beta_{l1} x_1 + \cdots + \beta_{lp} x_p}}
+    \]
+    \item The log odds ratio between two classes $k$ and $k^{\prime}$ is:
+    \[
+    \log \left(\frac{\operatorname{Pr}(Y=k \mid X=x)}{\operatorname{Pr}(Y=k^{\prime} \mid X=x)}\right) = (\beta_{k0} - \beta_{k^{\prime}0}) + \sum_{j=1}^{p} (\beta_{kj} - \beta_{k^{\prime}j}) x_j
+    \]
+\end{itemize}
+
+\section{Bayes Classifiers, K-nearest neighbours}
+
+\begin{itemize}
+  \item For classifying data points, we can use Bayes' Theorem:
+  \[
+  p(\mathcal{C}_k \mid X) = \frac{p(X \mid \mathcal{C}_k) p(\mathcal{C}_k)}{p(X)}
+  \]
+  \item We can assign a data point to the class with the highest posterior probability:
+  \[
+  d(x) = \arg\max_k \, p(\mathcal{C}_k \mid X)
+  \]
+  \item Decision regions $\mathcal{R}_k$ are separated by boundaries based on $p(\mathcal{C}_k \mid X)$.
+\end{itemize}
+
+\subsection{Loss and Loss Matrix}
+
+\begin{itemize}
+  \item The loss matrix $L_{kj}$ captures the cost of predicting class $j$ when the true class is $k$. Each element of the matrix represents how costly a mistake is. For example, a large $L_{kj}$ indicates that predicting $j$ when the true class is $k$ is a serious error.
+  \item In the matrix, rows represent the true class, and columns represent the predicted class:
+  \[
+  L_{kj} \quad \text{(Rows: True Class, Columns: Predicted Class)}
+  \]
+  \item The goal is to minimize the expected loss:
+  \[
+  \mathbb{E}[L] = \sum_{k} \sum_{j} \int_{\mathcal{R}_j} L_{kj} p(X) p(\mathcal{C}_k \mid X) \, dX
+  \]
+  This formula sums over all classes $k$ and predictions $j$, calculating the total cost of assigning a point $X$ to class $j$ while the true class is $k$. The integral over region $\mathcal{R}_j$ considers all feature space where class $j$ is predicted.
+  \item To minimize loss, we assign $X$ to the class $j$ that minimizes:
+  \[
+  \sum_{k} L_{kj} p(\mathcal{C}_k \mid X)
+  \]
+  Here, for each possible predicted class $j$, we sum the cost $L_{kj}$ weighted by the posterior probability $p(\mathcal{C}_k \mid X)$, selecting the class $j$ that minimizes this sum. This ensures the decision balances the cost of errors with the likelihood of each class.
+\end{itemize}
+
+\subsection{Bayes Classifier}
+
+\begin{itemize}
+  \item The Bayes classifier is a specific case of minimizing expected loss, using a 0-1 loss function, defined as:
+  \[
+  L(j, k) = \begin{cases} 1, & j \neq k \\ 0, & j = k \end{cases}
+  \]
+  This is a loss function, where all errors are equal, unlike in the loss matrix with varying costs.
+  
+  \item The Bayes classifier assigns a new data point $X$ to the class with the highest posterior probability:
+  \[
+  d(x) = \arg\max_y \, p(Y = y \mid X)
+  \]
+\end{itemize}
+
+\subsection{KNN for Classification}
+
+\begin{itemize}
+  \item Find the $K$ nearest neighbors to $X_0$ and estimate class probabilities based on neighbors' classes:
+  \[
+  p(Y = j \mid X_0) = \frac{1}{K} \sum_{i \in \mathcal{N}_0} I(y_i = j)
+  \]
+  \item Assign to the class with the highest posterior probability.
+\end{itemize}
+
+\subsubsection{Choosing $K$}
+
+\begin{itemize}
+  \item Low $K$: highly flexible boundaries.
+  \item High $K$: less flexible, possibly too rigid.
+  \item Choose $K$ via cross-validation to optimize performance.
 \end{itemize}
 
 \end{document}
