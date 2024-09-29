@@ -495,4 +495,188 @@ Where:
   \item Choose $K$ via cross-validation to optimize performance.
 \end{itemize}
 
+\section{Linear Discriminant Analysis (LDA) and Quadratic Discriminant Analysis (QDA)}
+
+\textbf{Oversimplified TLDR:}
+\begin{itemize}
+    \item Both assume all classes have a Gaussian distribution
+    \item \textbf{LDA:}
+    \begin{itemize}
+        \item Assumes equal variation (same covariance) between classes
+        \item Has straight (linear) decision boundaries
+        \item Works well with less data due to fewer parameters to estimate
+    \end{itemize}
+    \item \textbf{QDA:}
+    \begin{itemize}
+        \item Assumes different variation (different covariance) between classes
+        \item Has curved (quadratic) decision boundaries
+        \item More flexible but requires more data to avoid overfitting
+    \end{itemize}
+\end{itemize}
+
+\subsection{LDA}
+
+\begin{itemize}
+  \item LDA is a generative classification model that assumes the feature vectors $\mathbf{x} \in \mathbb{R}^p$ are generated from class-specific Gaussian distributions.
+  \item Key assumptions of LDA:
+  \begin{itemize}
+    \item The class conditional densities $p(\mathbf{x} \mid \mathcal{C}_k)$ are multivariate Gaussian distributions.
+    \item All classes share a common covariance matrix $\boldsymbol{\Sigma}$.
+  \end{itemize}
+  \item The class conditional density function is:
+  \[
+  p(\mathbf{x} \mid \mathcal{C}_k) = \frac{1}{(2\pi)^{p/2} |\boldsymbol{\Sigma}|^{1/2}} \exp\left( -\frac{1}{2} (\mathbf{x} - \boldsymbol{\mu}_k)^\top \boldsymbol{\Sigma}^{-1} (\mathbf{x} - \boldsymbol{\mu}_k) \right)
+  \]
+  where:
+  \begin{itemize}
+    \item $\boldsymbol{\mu}_k$ is the mean vector of class $\mathcal{C}_k$.
+    \item $|\boldsymbol{\Sigma}|$ denotes the determinant of the covariance matrix.
+    \item $p$ is the number of features.
+  \end{itemize}
+  \item Using Bayes' theorem, the posterior probability is:
+  \[
+  P(\mathcal{C}_k \mid \mathbf{x}) = \frac{\pi_k \, p(\mathbf{x} \mid \mathcal{C}_k)}{p(\mathbf{x})}
+  \]
+  where $\pi_k = P(\mathcal{C}_k)$ is the prior probability of class $\mathcal{C}_k$.
+  \item The discriminant function for LDA is linear in $\mathbf{x}$:
+  \[
+  \delta_k(\mathbf{x}) = \mathbf{x}^\top \boldsymbol{\Sigma}^{-1} \boldsymbol{\mu}_k - \frac{1}{2} \boldsymbol{\mu}_k^\top \boldsymbol{\Sigma}^{-1} \boldsymbol{\mu}_k + \ln \pi_k
+  \]
+  \item Classification rule:
+  \[
+  \text{Assign } \mathbf{x} \text{ to class } \mathcal{C}_k \text{ if } \delta_k(\mathbf{x}) = \max_{j} \delta_j(\mathbf{x})
+  \]
+  \item Decision boundaries are linear hyperplanes separating the classes.
+\end{itemize}
+
+\subsubsection{Estimation of Parameters}
+
+\begin{itemize}
+  \item \textbf{Class Means}:
+  \[
+  \hat{\boldsymbol{\mu}}_k = \frac{1}{n_k} \sum_{i \in \mathcal{C}_k} \mathbf{x}_i
+  \]
+  where $n_k$ is the number of observations in class $\mathcal{C}_k$.
+  \item \textbf{Common Covariance Matrix}:
+  \[
+  \hat{\boldsymbol{\Sigma}} = \frac{1}{n - K} \sum_{k=1}^K \sum_{i \in \mathcal{C}_k} (\mathbf{x}_i - \hat{\boldsymbol{\mu}}_k)(\mathbf{x}_i - \hat{\boldsymbol{\mu}}_k)^\top
+  \]
+  where $n$ is the total number of observations and $K$ is the number of classes.
+  \item \textbf{Class Priors}:
+  \[
+  \hat{\pi}_k = \frac{n_k}{n}
+  \]
+  These can also be set based on prior knowledge.
+\end{itemize}
+
+\subsection{Quadratic Discriminant Analysis (QDA)}
+
+\begin{itemize}
+  \item QDA relaxes the assumption of a common covariance matrix, allowing each class to have its own covariance matrix $\boldsymbol{\Sigma}_k$.
+  \item The class conditional density function is:
+  \[
+  p(\mathbf{x} \mid \mathcal{C}_k) = \frac{1}{(2\pi)^{p/2} |\boldsymbol{\Sigma}_k|^{1/2}} \exp\left( -\frac{1}{2} (\mathbf{x} - \boldsymbol{\mu}_k)^\top \boldsymbol{\Sigma}_k^{-1} (\mathbf{x} - \boldsymbol{\mu}_k) \right)
+  \]
+  \item The discriminant function for QDA is quadratic in $\mathbf{x}$:
+  \[
+  \delta_k(\mathbf{x}) = -\frac{1}{2} \ln |\boldsymbol{\Sigma}_k| - \frac{1}{2} (\mathbf{x} - \boldsymbol{\mu}_k)^\top \boldsymbol{\Sigma}_k^{-1} (\mathbf{x} - \boldsymbol{\mu}_k) + \ln \pi_k
+  \]
+  \item Classification rule:
+  \[
+  \text{Assign } \mathbf{x} \text{ to class } \mathcal{C}_k \text{ if } \delta_k(\mathbf{x}) = \max_{j} \delta_j(\mathbf{x})
+  \]
+  \item Decision boundaries are quadratic surfaces in the feature space.
+\end{itemize}
+
+\subsubsection{Estimation of Parameters}
+
+\begin{itemize}
+  \item \textbf{Class Means}:
+  \[
+  \hat{\boldsymbol{\mu}}_k = \frac{1}{n_k} \sum_{i \in \mathcal{C}_k} \mathbf{x}_i
+  \]
+  \item \textbf{Class Covariance Matrices}:
+  \[
+  \hat{\boldsymbol{\Sigma}}_k = \frac{1}{n_k - 1} \sum_{i \in \mathcal{C}_k} (\mathbf{x}_i - \hat{\boldsymbol{\mu}}_k)(\mathbf{x}_i - \hat{\boldsymbol{\mu}}_k)^\top
+  \]
+  \item \textbf{Class Priors}:
+  \[
+  \hat{\pi}_k = \frac{n_k}{n}
+  \]
+\end{itemize}
+
+\subsection{Comparison between LDA and QDA}
+
+\begin{itemize}
+  \item \textbf{Assumptions}:
+  \begin{itemize}
+    \item LDA assumes equal covariance matrices across classes.
+    \item QDA allows for different covariance matrices for each class.
+  \end{itemize}
+  \item \textbf{Decision Boundaries}:
+  \begin{itemize}
+    \item LDA produces linear decision boundaries.
+    \item QDA produces quadratic decision boundaries.
+  \end{itemize}
+  \item \textbf{Complexity}:
+  \begin{itemize}
+    \item LDA estimates fewer parameters, which can be advantageous with limited data.
+    \item QDA requires estimation of separate covariance matrices, increasing the number of parameters.
+  \end{itemize}
+  \item \textbf{Bias-Variance Tradeoff}:
+  \begin{itemize}
+    \item LDA may have higher bias if the assumption of equal covariances is violated.
+    \item QDA may have higher variance due to more parameters, potentially leading to overfitting.
+  \end{itemize}
+  \item \textbf{When to Use}:
+  \begin{itemize}
+    \item LDA is preferred when class covariances are similar and the sample size is small.
+    \item QDA is suitable when class covariances differ significantly and there is sufficient data.
+  \end{itemize}
+\end{itemize}
+
+\subsection{Bias-Variance Tradeoff}
+
+\begin{itemize}
+  \item \textbf{LDA}:
+  \begin{itemize}
+    \item Lower variance due to fewer parameters.
+    \item Potentially higher bias if covariance matrices are not equal.
+  \end{itemize}
+  \item \textbf{QDA}:
+  \begin{itemize}
+    \item Lower bias as it models each class more flexibly.
+    \item Higher variance due to more parameters to estimate.
+  \end{itemize}
+  \item The choice depends on the dataset size and whether the equal covariance assumption holds.
+\end{itemize}
+
+\subsection{Decision Rule Interpretation}
+
+\begin{itemize}
+  \item The discriminant functions $\delta_k(\mathbf{x})$ can be seen as scoring functions.
+  \item The classification rule selects the class with the highest score.
+  \item The decision boundaries are determined by where the discriminant functions are equal.
+\end{itemize}
+
+\subsection{Practical Considerations}
+
+\begin{itemize}
+  \item \textbf{Regularization}:
+  \begin{itemize}
+    \item In cases of small sample sizes, covariance estimates may be unstable.
+    \item Regularization techniques can be applied to covariance matrices to improve estimates.
+  \end{itemize}
+  \item \textbf{Computational Efficiency}:
+  \begin{itemize}
+    \item LDA is computationally less intensive due to a single covariance matrix.
+    \item QDA requires inversion of multiple covariance matrices.
+  \end{itemize}
+  \item \textbf{Assumption Checking}:
+  \begin{itemize}
+    \item It's important to check the assumption of normality.
+    \item Techniques like plotting or statistical tests can be used to assess distributional assumptions.
+  \end{itemize}
+\end{itemize}
+
 \end{document}
