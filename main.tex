@@ -679,4 +679,265 @@ Where:
   \end{itemize}
 \end{itemize}
 
+\section{Multivariate Gaussian Distribution, LDA, and QDA with Multiple Features}
+
+\textbf{Oversimplified TLDR:}
+\begin{itemize}
+    \item Multivariate Gaussian distributions extend the normal distribution to multiple dimensions.
+    \item \textbf{LDA with Multiple Features:}
+    \begin{itemize}
+        \item Assumes class conditional densities are multivariate Gaussian with a common covariance matrix.
+        \item Decision boundaries are linear hyperplanes.
+    \end{itemize}
+    \item \textbf{QDA with Multiple Features:}
+    \begin{itemize}
+        \item Assumes class conditional densities are multivariate Gaussian with class-specific covariance matrices.
+        \item Decision boundaries are quadratic surfaces.
+    \end{itemize}
+\end{itemize}
+
+\subsection{Multivariate Data}
+
+\begin{itemize}
+    \item \textbf{Random Vectors:} If $X_1, X_2, \ldots, X_p$ are real-valued random variables, we can define a $p$-dimensional random vector $\mathbf{X}$ as:
+    \[
+    \mathbf{X} = \begin{bmatrix} X_1 \\ \vdots \\ X_p \end{bmatrix}
+    \]
+    \item \textbf{Expectation (Mean):} The expectation of $\mathbf{X}$ is:
+    \[
+    \mathbb{E}[\mathbf{X}] = \begin{bmatrix} \mathbb{E}[X_1] \\ \vdots \\ \mathbb{E}[X_p] \end{bmatrix}
+    \]
+    \item \textbf{Sample Mean:} Given $n$ observations $\{\mathbf{X}_1, \mathbf{X}_2, \ldots, \mathbf{X}_n\}$, the sample mean is:
+    \[
+    \hat{\boldsymbol{\mu}} = \frac{1}{n} \sum_{i=1}^n \mathbf{X}_i
+    \]
+    \item \textbf{Variance and Covariance Matrix:} The variance of $\mathbf{X}$ is the covariance matrix $\boldsymbol{\Sigma}$, defined as:
+    \[
+    \operatorname{Var}[\mathbf{X}] = \mathbb{E}\left[(\mathbf{X} - \mathbb{E}[\mathbf{X}]) (\mathbf{X} - \mathbb{E}[\mathbf{X}])^\top\right]
+    \]
+    where $\boldsymbol{\Sigma}$ is a $p \times p$ matrix with entries:
+    \[
+    \Sigma_{ij} = \operatorname{Cov}[X_i, X_j]
+    \]
+\end{itemize}
+
+\subsection{The Multivariate Normal Distribution}
+
+\begin{itemize}
+    \item The $p$-dimensional \textbf{Multivariate Normal Distribution} with mean vector $\boldsymbol{\mu}$ and covariance matrix $\boldsymbol{\Sigma}$ has the probability density function:
+    \[
+    p(\mathbf{x}; \boldsymbol{\mu}, \boldsymbol{\Sigma}) = \frac{1}{(2\pi)^{p/2} |\boldsymbol{\Sigma}|^{1/2}} \exp\left\{ -\frac{1}{2} (\mathbf{x} - \boldsymbol{\mu})^\top \boldsymbol{\Sigma}^{-1} (\mathbf{x} - \boldsymbol{\mu}) \right\}
+    \]
+    \item The exponent involves the \textbf{Mahalanobis distance}:
+    \[
+    (\mathbf{x} - \boldsymbol{\mu})^\top \boldsymbol{\Sigma}^{-1} (\mathbf{x} - \boldsymbol{\mu}) = \|\mathbf{x} - \boldsymbol{\mu}\|_{\boldsymbol{\Sigma}}^2
+    \]
+    \item \textbf{Special Case:} When $\boldsymbol{\Sigma} = \mathbf{I}$ (identity matrix), the variables are independent standard normal, and the Mahalanobis distance reduces to the Euclidean distance:
+    \[
+    \|\mathbf{x} - \boldsymbol{\mu}\|_{\mathbf{I}}^2 = \sum_{i=1}^p (x_i - \mu_i)^2
+    \]
+    \item \textbf{Properties:}
+    \begin{itemize}
+        \item Any linear transformation or translation of a multivariate normal variable is also multivariate normal.
+        \item Marginal distributions of subsets of variables are multivariate normal.
+    \end{itemize}
+\end{itemize}
+
+\subsection{Linear Discriminant Analysis (LDA) with Multiple Features}
+
+\begin{itemize}
+    \item \textbf{Assumptions:}
+    \begin{itemize}
+        \item Each class conditional density $p(\mathbf{x} \mid \mathcal{C}_k)$ is a multivariate normal distribution with mean $\boldsymbol{\mu}_k$ and common covariance matrix $\boldsymbol{\Sigma}$:
+        \[
+        p(\mathbf{x} \mid \mathcal{C}_k) = \frac{1}{(2\pi)^{p/2} |\boldsymbol{\Sigma}|^{1/2}} \exp\left\{ -\frac{1}{2} (\mathbf{x} - \boldsymbol{\mu}_k)^\top \boldsymbol{\Sigma}^{-1} (\mathbf{x} - \boldsymbol{\mu}_k) \right\}
+        \]
+    \end{itemize}
+    \item \textbf{Discriminant Function:}
+    \begin{itemize}
+        \item The discriminant function for class $\mathcal{C}_k$ is derived from the log of the joint probability:
+        \[
+        g_k(\mathbf{x}) = \ln \pi_k - \frac{1}{2} (\mathbf{x} - \boldsymbol{\mu}_k)^\top \boldsymbol{\Sigma}^{-1} (\mathbf{x} - \boldsymbol{\mu}_k)
+        \]
+        \item Simplifies to:
+        \[
+        g_k(\mathbf{x}) = \mathbf{x}^\top \boldsymbol{\Sigma}^{-1} \boldsymbol{\mu}_k - \frac{1}{2} \boldsymbol{\mu}_k^\top \boldsymbol{\Sigma}^{-1} \boldsymbol{\mu}_k + \ln \pi_k
+        \]
+    \end{itemize}
+    \item \textbf{Classification Rule:}
+    \begin{itemize}
+        \item Assign $\mathbf{x}$ to the class with the highest discriminant score:
+        \[
+        \text{Classify } \mathbf{x} \text{ to class } \mathcal{C}_k \text{ if } g_k(\mathbf{x}) = \max_j g_j(\mathbf{x})
+        \]
+    \end{itemize}
+    \item \textbf{Decision Boundaries:}
+    \begin{itemize}
+        \item The boundaries between classes are linear hyperplanes where $g_j(\mathbf{x}) = g_k(\mathbf{x})$.
+    \end{itemize}
+\end{itemize}
+
+\subsection{Quadratic Discriminant Analysis (QDA) with Multiple Features}
+
+\begin{itemize}
+    \item \textbf{Assumptions:}
+    \begin{itemize}
+        \item Each class conditional density $p(\mathbf{x} \mid \mathcal{C}_k)$ is a multivariate normal distribution with mean $\boldsymbol{\mu}_k$ and covariance matrix $\boldsymbol{\Sigma}_k$:
+        \[
+        p(\mathbf{x} \mid \mathcal{C}_k) = \frac{1}{(2\pi)^{p/2} |\boldsymbol{\Sigma}_k|^{1/2}} \exp\left\{ -\frac{1}{2} (\mathbf{x} - \boldsymbol{\mu}_k)^\top \boldsymbol{\Sigma}_k^{-1} (\mathbf{x} - \boldsymbol{\mu}_k) \right\}
+        \]
+    \end{itemize}
+    \item \textbf{Discriminant Function:}
+    \begin{itemize}
+        \item The discriminant function for class $\mathcal{C}_k$ is:
+        \[
+        g_k(\mathbf{x}) = \ln \pi_k - \frac{1}{2} \ln |\boldsymbol{\Sigma}_k| - \frac{1}{2} (\mathbf{x} - \boldsymbol{\mu}_k)^\top \boldsymbol{\Sigma}_k^{-1} (\mathbf{x} - \boldsymbol{\mu}_k)
+        \]
+    \end{itemize}
+    \item \textbf{Classification Rule:}
+    \begin{itemize}
+        \item Assign $\mathbf{x}$ to the class with the highest $g_k(\mathbf{x})$.
+    \end{itemize}
+    \item \textbf{Decision Boundaries:}
+    \begin{itemize}
+        \item The boundaries between classes are quadratic surfaces defined by $g_j(\mathbf{x}) = g_k(\mathbf{x})$.
+    \end{itemize}
+\end{itemize}
+
+\subsection{Constructing Decision Boundaries}
+
+\begin{itemize}
+    \item \textbf{LDA Decision Boundary:}
+    \begin{itemize}
+        \item Between classes $\mathcal{C}_j$ and $\mathcal{C}_k$, the decision boundary is where:
+        \[
+        g_j(\mathbf{x}) = g_k(\mathbf{x})
+        \]
+        \item Simplifies to a linear equation in $\mathbf{x}$.
+    \end{itemize}
+    \item \textbf{Effect of Class Priors:}
+    \begin{itemize}
+        \item Increasing the prior probability $\pi_k$ shifts the decision boundary away from $\boldsymbol{\mu}_k$.
+        \item The term $\ln \pi_k$ influences the discriminant function.
+    \end{itemize}
+    \item \textbf{QDA Decision Boundary:}
+    \begin{itemize}
+        \item Boundaries are more complex due to class-specific covariance matrices.
+        \item The equation $g_j(\mathbf{x}) = g_k(\mathbf{x})$ results in quadratic terms.
+    \end{itemize}
+\end{itemize}
+
+\subsection{Issues with LDA and QDA}
+
+\begin{itemize}
+    \item \textbf{Number of Parameters:}
+    \begin{itemize}
+        \item Covariance matrix $\boldsymbol{\Sigma}$ has $\frac{p(p+1)}{2}$ parameters.
+        \item LDA estimates one covariance matrix; QDA estimates one per class.
+    \end{itemize}
+    \item \textbf{Bias-Variance Trade-Off:}
+    \begin{itemize}
+        \item LDA has lower variance but higher bias if the assumption of equal covariances is incorrect.
+        \item QDA has lower bias but higher variance due to more parameters.
+    \end{itemize}
+    \item \textbf{Naive Bayes Classifier:}
+    \begin{itemize}
+        \item Assumes independence among features, leading to diagonal covariance matrices.
+        \item Simplifies computation but may not capture feature correlations.
+    \end{itemize}
+\end{itemize}
+
+\subsection{Case Studies}
+
+\subsubsection{Case 1: Equal Covariance Matrices (No Correlations)}
+
+\begin{itemize}
+    \item Covariance matrices are equal and features are uncorrelated.
+    \item LDA performs well due to matching assumptions.
+    \item Logistic regression and Naive Bayes provide similar performance.
+\end{itemize}
+
+\subsubsection{Case 2: Unequal Covariance Matrices (No Correlations)}
+
+\begin{itemize}
+    \item Covariance matrices differ but features remain uncorrelated.
+    \item QDA outperforms LDA as it models class-specific covariances.
+    \item Logistic regression may require additional features (e.g., interaction terms) to capture the non-linearity.
+\end{itemize}
+
+\subsubsection{Case 3: Unequal Covariance Matrices (With Correlations)}
+
+\begin{itemize}
+    \item Covariance matrices differ and features are correlated.
+    \item QDA and logistic regression with interaction terms perform best.
+    \item Naive Bayes performs poorly due to the independence assumption.
+\end{itemize}
+
+\subsection{Test Error Comparison}
+
+\begin{center}
+\begin{tabular}{lccccc}
+\hline
+ & LDA & QDA & Naive Bayes & Logistic Regression & Logistic Regression (Quadratic) \\
+\hline
+Case 1 & 1.20\% & 1.30\% & 1.33\% & 1.40\% & 1.33\% \\
+Case 2 & 8.00\% & 7.27\% & 7.43\% & 7.60\% & 7.57\% \\
+Case 3 & 2.27\% & 0.63\% & 2.20\% & 0.87\% & 0.60\% \\
+\hline
+\end{tabular}
+\end{center}
+
+\subsection{LDA vs Logistic Regression}
+
+\begin{itemize}
+    \item \textbf{Relationship:}
+    \begin{itemize}
+        \item Both produce linear decision boundaries under certain conditions.
+        \item LDA assumes normality and equal covariances; logistic regression does not.
+    \end{itemize}
+    \item \textbf{Log-Posterior Odds:}
+    \begin{itemize}
+        \item In logistic regression, the log-odds are modeled directly:
+        \[
+        \log\left( \frac{P(\mathcal{C}_k \mid \mathbf{x})}{P(\mathcal{C}_K \mid \mathbf{x})} \right) = \boldsymbol{\beta}_k^\top \mathbf{x} + \beta_{0k}
+        \]
+        \item LDA implies a linear model for log-odds when the normality assumptions hold.
+    \end{itemize}
+    \item \textbf{Advantages of LDA:}
+    \begin{itemize}
+        \item More efficient if the normality and equal covariance assumptions are valid.
+        \item Naturally incorporates class priors.
+    \end{itemize}
+    \item \textbf{Advantages of Logistic Regression:}
+    \begin{itemize}
+        \item Flexible in including various types of predictors and transformations.
+        \item Does not rely on distributional assumptions.
+    \end{itemize}
+\end{itemize}
+
+\subsection{Practical Considerations}
+
+\begin{itemize}
+    \item \textbf{Regularization:}
+    \begin{itemize}
+        \item In high dimensions, covariance estimates may be unstable.
+        \item Regularization techniques can improve estimates (e.g., shrinkage methods).
+    \end{itemize}
+    \item \textbf{Computational Efficiency:}
+    \begin{itemize}
+        \item LDA is computationally less intensive than QDA.
+        \item QDA requires inversion of multiple covariance matrices.
+    \end{itemize}
+    \item \textbf{Assumption Checking:}
+    \begin{itemize}
+        \item Check normality of features using plots or tests.
+        \item Verify the homogeneity of covariances for LDA.
+    \end{itemize}
+    \item \textbf{Feature Engineering:}
+    \begin{itemize}
+        \item Including interaction terms or polynomial features can improve logistic regression.
+        \item Dimensionality reduction techniques (e.g., PCA) may be beneficial.
+    \end{itemize}
+\end{itemize}
+
 \end{document}
