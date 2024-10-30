@@ -940,4 +940,243 @@ Case 3 & 2.27\% & 0.63\% & 2.20\% & 0.87\% & 0.60\% \\
     \end{itemize}
 \end{itemize}
 
+\section{Performance Metrics in Classification}
+
+\textbf{Oversimplified TLDR:}
+\begin{itemize}
+    \item Classification performance is assessed using various metrics beyond simple accuracy.
+    \item \textbf{Confusion Matrix:} Summarizes the correct and incorrect predictions for each class.
+    \item \textbf{Precision:} Measures the proportion of positive identifications that are correct.
+    \item \textbf{Recall:} Measures the proportion of actual positives correctly identified.
+    \item \textbf{F1-Score:} Harmonic mean of precision and recall; balances both metrics.
+    \item \textbf{ROC Curve:} Plots true positive rate against false positive rate at various thresholds.
+    \item \textbf{Adjusting Decision Threshold:} Changes the balance between precision and recall.
+\end{itemize}
+
+\subsection{Confusion Matrix}
+
+\begin{itemize}
+    \item A confusion matrix is a table that describes the performance of a classification model.
+    \item For binary classification, it is a $2 \times 2$ matrix:
+    \[
+    \begin{tabular}{|c|c|c|}
+    \hline
+    & \textbf{Predicted Positive} & \textbf{Predicted Negative} \\
+    \hline
+    \textbf{Actual Positive} & \text{True Positive (TP)} & \text{False Negative (FN)} \\
+    \hline
+    \textbf{Actual Negative} & \text{False Positive (FP)} & \text{True Negative (TN)} \\
+    \hline
+    \end{tabular}
+    \]
+    \item Definitions:
+    \begin{itemize}
+        \item \textbf{True Positive (TP):} Correctly predicted positive instances.
+        \item \textbf{False Positive (FP):} Incorrectly predicted positive instances.
+        \item \textbf{False Negative (FN):} Incorrectly predicted negative instances.
+        \item \textbf{True Negative (TN):} Correctly predicted negative instances.
+    \end{itemize}
+    \item The confusion matrix can be extended to multi-class classification problems.
+\end{itemize}
+
+\subsubsection{Stock Price Prediction Example}
+
+\begin{itemize}
+    \item Task: Predict stock price movement (\textit{Increase}, \textit{Decrease}, \textit{Unchanged}).
+    \item Sample confusion matrix:
+    \[
+    \begin{tabular}{|c|c|c|c|c|}
+    \hline
+    & \multicolumn{3}{c|}{\textbf{Predicted Class}} & \textbf{Total} \\
+    \hline
+    \textbf{Actual Class} & \text{Increase} & \text{Decrease} & \text{Unchanged} & \\
+    \hline
+    \text{Increase} & 9 & 3 & 28 & 40 \\
+    \hline
+    \text{Decrease} & 1 & 5 & 34 & 40 \\
+    \hline
+    \text{Unchanged} & 4 & 3 & 33 & 40 \\
+    \hline
+    \textbf{Total} & 14 & 11 & 95 & 120 \\
+    \hline
+    \end{tabular}
+    \]
+    \item \textbf{Accuracy}:
+    \[
+    \text{Accuracy} = \frac{9 + 5 + 33}{120} = \frac{47}{120} \approx 0.392
+    \]
+    \item \textbf{Misclassification Rate}:
+    \[
+    \text{Misclassification Rate} = 1 - \text{Accuracy} \approx 0.608
+    \]
+\end{itemize}
+
+\subsection{Accuracy and Misclassification Rate}
+
+\begin{itemize}
+    \item \textbf{Accuracy} measures the proportion of correctly classified instances:
+    \[
+    \text{Accuracy} = \frac{TP + TN}{TP + FP + FN + TN}
+    \]
+    \item \textbf{Misclassification Rate} is the proportion of incorrectly classified instances:
+    \[
+    \text{Misclassification Rate} = \frac{FP + FN}{TP + FP + FN + TN}
+    \]
+    \item High accuracy can be misleading in imbalanced datasets.
+\end{itemize}
+
+\subsection{Precision and Recall}
+
+\begin{itemize}
+    \item \textbf{Precision} (Positive Predictive Value):
+    \[
+    \text{Precision} = \frac{TP}{TP + FP}
+    \]
+    \item \textbf{Recall} (Sensitivity or True Positive Rate):
+    \[
+    \text{Recall} = \frac{TP}{TP + FN}
+    \]
+    \item These metrics help understand the model's ability to correctly predict positive instances.
+\end{itemize}
+
+\subsubsection{Calculating Precision and Recall for "Increase" Class}
+
+\begin{itemize}
+    \item For the \textit{Increase} class:
+    \begin{itemize}
+        \item \textbf{True Positives (TP)}: 9
+        \item \textbf{False Positives (FP)}: Predictions of \textit{Increase} when actual is not \textit{Increase}:
+        \[
+        \text{FP} = \text{Predicted Increase Total} - \text{TP} = 14 - 9 = 5
+        \]
+        \item \textbf{False Negatives (FN)}: Actual \textit{Increase} instances predicted as other classes:
+        \[
+        \text{FN} = \text{Actual Increase Total} - \text{TP} = 40 - 9 = 31
+        \]
+    \end{itemize}
+    \item \textbf{Precision for Increase}:
+    \[
+    \text{Precision}_{\text{Increase}} = \frac{9}{9 + 5} = \frac{9}{14} \approx 0.643
+    \]
+    \item \textbf{Recall for Increase}:
+    \[
+    \text{Recall}_{\text{Increase}} = \frac{9}{9 + 31} = \frac{9}{40} = 0.225
+    \]
+    \item \textbf{Interpretation}:
+    \begin{itemize}
+        \item Precision of 0.643 means that 64.3\% of predicted \textit{Increase} instances are correct.
+        \item Recall of 0.225 indicates that 22.5\% of actual \textit{Increase} instances are correctly identified.
+    \end{itemize}
+\end{itemize}
+
+\subsubsection{When to Use Precision vs. Recall}
+
+\begin{itemize}
+    \item \textbf{High Precision} is important when false positives are costly.
+    \begin{itemize}
+        \item Example: Diagnosing a rare disease where treatment is expensive or has side effects.
+    \end{itemize}
+    \item \textbf{High Recall} is crucial when missing positive cases is costly.
+    \begin{itemize}
+        \item Example: Screening for cancer where early detection is critical.
+    \end{itemize}
+\end{itemize}
+
+\subsection{F1-Score}
+
+\begin{itemize}
+    \item The F1-score combines precision and recall:
+    \[
+    F1 = 2 \times \frac{\text{Precision} \times \text{Recall}}{\text{Precision} + \text{Recall}}
+    \]
+    \item For the \textit{Increase} class:
+    \[
+    F1_{\text{Increase}} = 2 \times \frac{0.643 \times 0.225}{0.643 + 0.225} \approx 0.333
+    \]
+    \item The F1-score is low when either precision or recall is low.
+\end{itemize}
+
+\subsection{Receiver Operating Characteristic (ROC) Curve}
+
+\begin{itemize}
+    \item The ROC curve plots the \textbf{True Positive Rate (TPR)} against the \textbf{False Positive Rate (FPR)} at various thresholds.
+    \item \textbf{True Positive Rate (TPR)}:
+    \[
+    \text{TPR} = \text{Recall} = \frac{TP}{TP + FN}
+    \]
+    \item \textbf{False Positive Rate (FPR)}:
+    \[
+    \text{FPR} = \frac{FP}{FP + TN}
+    \]
+    \item The area under the ROC curve (AUC) indicates the classifier's ability to distinguish between classes.
+    \item A higher AUC represents better performance.
+\end{itemize}
+
+\subsubsection{Interpreting the ROC Curve}
+
+\begin{itemize}
+    \item The ROC curve helps in selecting an optimal threshold by visualizing the trade-off between TPR and FPR.
+    \item It is particularly useful in imbalanced datasets.
+\end{itemize}
+
+\subsection{Adjusting the Decision Threshold}
+
+\begin{itemize}
+    \item Classification models often output probabilities or scores.
+    \item The decision threshold determines the point above which instances are classified as positive.
+    \item Adjusting the threshold affects precision and recall:
+    \begin{itemize}
+        \item Increasing the threshold generally increases precision but decreases recall.
+        \item Decreasing the threshold generally increases recall but decreases precision.
+    \end{itemize}
+    \item \textbf{Example}:
+    \begin{itemize}
+        \item If the cost of false negatives is high, set a lower threshold to increase recall.
+        \item If the cost of false positives is high, set a higher threshold to increase precision.
+    \end{itemize}
+\end{itemize}
+
+\subsubsection{Impact on Confusion Matrix}
+
+\begin{itemize}
+    \item As the threshold changes, the numbers in the confusion matrix change accordingly.
+    \item This can be visualized by plotting precision and recall against different thresholds.
+\end{itemize}
+
+\subsection{Practical Considerations}
+
+\begin{itemize}
+    \item \textbf{Choice of Metric}:
+    \begin{itemize}
+        \item Select metrics that align with the specific goals and context of the task.
+        \item Be cautious of relying solely on accuracy.
+    \end{itemize}
+    \item \textbf{Model Evaluation}:
+    \begin{itemize}
+        \item Use cross-validation to assess model performance.
+        \item Compare models using relevant metrics.
+    \end{itemize}
+    \item \textbf{Model Interpretability}:
+    \begin{itemize}
+        \item Consider the trade-off between model complexity and interpretability.
+        \item Simpler models may be preferred if they offer similar performance.
+    \end{itemize}
+\end{itemize}
+
+\subsection{Comparing to Random Classifiers}
+
+\begin{itemize}
+    \item A model should perform better than random guessing.
+    \item To assess this, compare the model's performance to that of a classifier trained on shuffled labels.
+    \item If the model significantly outperforms the random baseline, it suggests that it has learned meaningful patterns.
+\end{itemize}
+
+\subsection{Final Thoughts}
+
+\begin{itemize}
+    \item Avoid focusing solely on improving numerical metrics without considering practical implications.
+    \item Ensure the model is sensible, interpretable, and aligns with domain knowledge.
+    \item Consider the costs associated with different types of errors when selecting thresholds and metrics.
+\end{itemize}
+
 \end{document}
