@@ -1179,4 +1179,545 @@ Case 3 & 2.27\% & 0.63\% & 2.20\% & 0.87\% & 0.60\% \\
     \item Consider the costs associated with different types of errors when selecting thresholds and metrics.
 \end{itemize}
 
+\section{Ensemble Methods: Bagging, Random Forests, and Boosting}
+
+\textbf{Oversimplified TLDR:}
+\begin{itemize}
+    \item \textbf{Ensemble Methods} combine multiple models to improve performance and robustness.
+    \item \textbf{Bagging (Bootstrap Aggregation):}
+    \begin{itemize}
+        \item Reduces variance by training multiple models on different bootstrapped subsets of data.
+        \item Aggregates predictions via averaging (regression) or majority voting (classification).
+        \item Particularly effective for high-variance, low-bias models like decision trees.
+    \end{itemize}
+    \item \textbf{Random Forests:}
+    \begin{itemize}
+        \item An extension of bagging using decision trees.
+        \item Introduces additional randomness by selecting random subsets of features at each split.
+        \item Further reduces variance and combats overfitting.
+    \end{itemize}
+    \item \textbf{Boosting:}
+    \begin{itemize}
+        \item Reduces bias by sequentially training models that focus on correcting previous errors.
+        \item Models are weighted based on their performance.
+        \item Aggregates predictions using weighted voting or summation.
+    \end{itemize}
+\end{itemize}
+
+\subsection{Introduction to Ensemble Methods}
+
+\begin{itemize}
+    \item \textbf{Ensemble Methods} aim to improve the performance of machine learning models by combining multiple learners.
+    \item The key idea is that a group of weak learners can come together to form a strong learner.
+    \item Ensemble methods can be categorized based on whether they primarily reduce variance or bias.
+\end{itemize}
+
+\subsection{Reducing Variance with Ensemble Methods}
+
+\begin{itemize}
+    \item Variance refers to the model's sensitivity to fluctuations in the training data.
+    \item High-variance models, like decision trees, can benefit from ensemble methods that reduce variance.
+    \item \textbf{Key Strategy:} Combine multiple independent models to average out errors.
+\end{itemize}
+
+\subsubsection{Need for Diversity}
+
+\begin{itemize}
+    \item For an ensemble to effectively reduce variance, the base learners should be diverse and make uncorrelated errors.
+    \item Diversity can be introduced by:
+    \begin{itemize}
+        \item \textbf{Using Different Predictors:} Training different types of classifiers on the same data.
+        \item \textbf{Varying Training Data:} Training the same classifier type on different subsets of the data.
+    \end{itemize}
+\end{itemize}
+
+\subsection{Bagging (Bootstrap Aggregation)}
+
+\begin{itemize}
+    \item \textbf{Bagging} stands for \textbf{Bootstrap Aggregating}.
+    \item It reduces variance by creating multiple versions of a predictor and using them to get an aggregated predictor.
+\end{itemize}
+
+\subsubsection{Training Procedure}
+
+\begin{enumerate}
+    \item Generate $m$ bootstrapped datasets $\{\mathcal{D}_1, \mathcal{D}_2, \dots, \mathcal{D}_m\}$ from the original training data $\mathcal{D}$.
+    \begin{itemize}
+        \item Each bootstrapped dataset is created by sampling $n$ instances from $\mathcal{D}$ with replacement.
+    \end{itemize}
+    \item Train a separate base learner $h_i$ on each bootstrapped dataset $\mathcal{D}_i$.
+\end{enumerate}
+
+\subsubsection{Prediction Procedure}
+
+\begin{itemize}
+    \item For regression:
+    \[
+    \hat{f}_{\text{bag}}(\mathbf{x}) = \frac{1}{m} \sum_{i=1}^{m} h_i(\mathbf{x})
+    \]
+    \item For classification:
+    \[
+    \hat{y}_{\text{bag}} = \text{MajorityVote}\left\{ h_1(\mathbf{x}), h_2(\mathbf{x}), \dots, h_m(\mathbf{x}) \right\}
+    \]
+\end{itemize}
+
+\subsubsection{Out-of-Bag (OOB) Error Estimation}
+
+\begin{itemize}
+    \item Approximately $37\%$ of the original data are not included in each bootstrapped dataset (since $(1 - \frac{1}{n})^n \approx \frac{1}{e} \approx 0.37$).
+    \item These \textbf{Out-of-Bag} samples can be used to estimate the prediction error without the need for a separate validation set.
+    \item \textbf{Procedure:}
+    \begin{enumerate}
+        \item For each instance, aggregate the predictions from the models where that instance was not included in the training data.
+        \item Compute the OOB error as the average error across all instances.
+    \end{enumerate}
+\end{itemize}
+
+\subsubsection{Advantages of Bagging}
+
+\begin{itemize}
+    \item Reduces variance without increasing bias significantly.
+    \item Easy to implement and parallelize.
+    \item Provides an unbiased estimation of the generalization error via OOB error.
+    \item Improves stability and reduces overfitting for high-variance models.
+\end{itemize}
+
+\subsection{Random Forests}
+
+\begin{itemize}
+    \item \textbf{Random Forests} are an extension of bagging, specifically applied to decision trees.
+    \item They introduce additional randomness in the model-building process.
+\end{itemize}
+
+\subsubsection{Training Procedure}
+
+\begin{enumerate}
+    \item Generate $m$ bootstrapped datasets from the original data.
+    \item For each node in a decision tree:
+    \begin{itemize}
+        \item Randomly select $k$ features from the total $p$ features.
+        \item Determine the best split among the selected $k$ features.
+    \end{itemize}
+    \item Train a full decision tree on each bootstrapped dataset using the modified splitting criterion.
+\end{enumerate}
+
+\subsubsection{Hyperparameters}
+
+\begin{itemize}
+    \item Number of trees $m$.
+    \item Number of features to consider at each split $k$.
+    \begin{itemize}
+        \item For classification: $k = \sqrt{p}$.
+        \item For regression: $k = \frac{p}{3}$.
+    \end{itemize}
+\end{itemize}
+
+\subsubsection{Advantages of Random Forests}
+
+\begin{itemize}
+    \item Further reduces variance compared to bagging.
+    \item Handles high-dimensional data well.
+    \item Provides estimates of feature importance.
+    \item Less prone to overfitting due to feature randomness.
+\end{itemize}
+
+\subsection{Boosting}
+
+\begin{itemize}
+    \item \textbf{Boosting} aims to reduce bias by combining weak learners sequentially.
+    \item Each new model focuses on the errors of the previous models.
+    \item Particularly useful when the base learner is simple and exhibits high bias.
+\end{itemize}
+
+\subsubsection{AdaBoost (Adaptive Boosting)}
+
+\begin{itemize}
+    \item Commonly used for classification problems.
+    \item Adjusts the weights of training instances based on classification errors.
+\end{itemize}
+
+\paragraph{Training Procedure}
+
+\begin{enumerate}
+    \item Initialize weights $w_i^{(1)} = \frac{1}{n}$ for $i = 1, 2, \dots, n$.
+    \item For $c = 1$ to $M$ (number of iterations):
+    \begin{enumerate}
+        \item Train a weak learner $h_c(\mathbf{x})$ using weights $w_i^{(c)}$.
+        \item Compute the weighted error:
+        \[
+        \epsilon_c = \frac{\sum_{i=1}^n w_i^{(c)} \mathbb{I}\left( h_c(\mathbf{x}_i) \neq y_i \right)}{\sum_{i=1}^n w_i^{(c)}}
+        \]
+        \item Compute the model's weight (amount of say):
+        \[
+        \alpha_c = \frac{1}{2} \ln\left( \frac{1 - \epsilon_c}{\epsilon_c} \right)
+        \]
+        \item Update the instance weights:
+        \[
+        w_i^{(c+1)} = w_i^{(c)} \times \begin{cases}
+            e^{-\alpha_c}, & \text{if } h_c(\mathbf{x}_i) = y_i \\
+            e^{\alpha_c}, & \text{if } h_c(\mathbf{x}_i) \neq y_i \\
+        \end{cases}
+        \]
+        \item Normalize the weights so that $\sum_{i=1}^n w_i^{(c+1)} = 1$.
+    \end{enumerate}
+\end{enumerate}
+
+\paragraph{Prediction Procedure}
+
+\begin{itemize}
+    \item The final prediction is a weighted majority vote:
+    \[
+    H(\mathbf{x}) = \text{sign}\left( \sum_{c=1}^M \alpha_c h_c(\mathbf{x}) \right)
+    \]
+\end{itemize}
+
+\subsubsection{Incorporating Weights into Training}
+
+\begin{itemize}
+    \item Weights can be incorporated by:
+    \begin{itemize}
+        \item Sampling training instances according to their weights.
+        \item Modifying the loss function to account for instance weights.
+        \item Adjusting the impurity measures in decision trees using weighted counts.
+    \end{itemize}
+\end{itemize}
+
+\subsubsection{Gradient Boosting}
+
+\begin{itemize}
+    \item A generalization of boosting for both regression and classification.
+    \item Models are trained to predict the residuals (errors) of the previous models.
+\end{itemize}
+
+\paragraph{Training Procedure}
+
+\begin{enumerate}
+    \item Initialize the model with a constant value:
+    \[
+    F_0(\mathbf{x}) = \arg\min_{\gamma} \sum_{i=1}^n L(y_i, \gamma)
+    \]
+    \item For $m = 1$ to $M$ (number of iterations):
+    \begin{enumerate}
+        \item Compute the pseudo-residuals:
+        \[
+        r_i^{(m)} = -\left[ \frac{\partial L(y_i, F(\mathbf{x}_i))}{\partial F(\mathbf{x}_i)} \right]_{F(\mathbf{x}) = F_{m-1}(\mathbf{x})}
+        \]
+        \item Fit a base learner $h_m(\mathbf{x})$ to the pseudo-residuals.
+        \item Update the model:
+        \[
+        F_m(\mathbf{x}) = F_{m-1}(\mathbf{x}) + \nu h_m(\mathbf{x})
+        \]
+        \item $\nu$ is the learning rate (typically between $0.01$ and $0.1$).
+    \end{enumerate}
+\end{enumerate}
+
+\paragraph{Advantages of Gradient Boosting}
+
+\begin{itemize}
+    \item Can optimize arbitrary differentiable loss functions.
+    \item Effective for both regression and classification.
+    \item Provides state-of-the-art results on many problems.
+\end{itemize}
+
+\subsection{Bagging vs. Boosting}
+
+\begin{itemize}
+    \item \textbf{Bagging:}
+    \begin{itemize}
+        \item Reduces variance.
+        \item Models are trained independently (can be parallelized).
+        \item Effective for high-variance, low-bias models.
+    \end{itemize}
+    \item \textbf{Boosting:}
+    \begin{itemize}
+        \item Reduces bias.
+        \item Models are trained sequentially (cannot be fully parallelized).
+        \item Effective for low-variance, high-bias models.
+        \item Can be prone to overfitting, especially with noisy data.
+    \end{itemize}
+\end{itemize}
+
+\subsection{Stacking}
+
+\begin{itemize}
+    \item \textbf{Stacking} involves training a meta-learner to combine the predictions of several base learners.
+    \item Base learners are trained on the original dataset.
+    \item The meta-learner is trained on the outputs of the base learners.
+\end{itemize}
+
+\subsubsection{Procedure}
+
+\begin{enumerate}
+    \item Split the training data into two sets.
+    \item Train base learners on the first set.
+    \item Generate predictions for the second set using the trained base learners.
+    \item Train a meta-learner on the predictions from the base learners.
+\end{enumerate}
+
+\subsubsection{Advantages of Stacking}
+
+\begin{itemize}
+    \item Can model complex relationships between base learners.
+    \item Often achieves better performance than individual models.
+\end{itemize}
+
+\subsection{Practical Considerations}
+
+\begin{itemize}
+    \item \textbf{Choice of Ensemble Method:}
+    \begin{itemize}
+        \item Depends on the problem, data size, and computational resources.
+        \item Bagging is suitable when variance is high.
+        \item Boosting is suitable when bias is high.
+    \end{itemize}
+    \item \textbf{Computational Efficiency:}
+    \begin{itemize}
+        \item Bagging and Random Forests can be parallelized.
+        \item Boosting requires sequential training.
+    \end{itemize}
+    \item \textbf{Overfitting:}
+    \begin{itemize}
+        \item Boosting can overfit on noisy datasets.
+        \item Regularization techniques and early stopping can mitigate overfitting.
+    \end{itemize}
+\end{itemize}
+
+\section{Support Vector Machines (SVM)}
+
+\textbf{Oversimplified TLDR:}
+\begin{itemize}
+    \item SVM aims to find the optimal hyperplane that separates classes by maximizing the margin between them.
+    \item \textbf{Hard-Margin SVM:}
+    \begin{itemize}
+        \item Assumes data is perfectly linearly separable.
+        \item Maximizes the minimum distance (margin) to the closest data points from each class.
+        \item Sensitive to outliers and cannot handle misclassifications.
+    \end{itemize}
+    \item \textbf{Soft-Margin SVM:}
+    \begin{itemize}
+        \item Allows some misclassifications to achieve better generalization.
+        \item Introduces slack variables and a regularization parameter $C$ to control the trade-off between maximizing margin and minimizing classification error.
+        \item More robust to noisy data and outliers.
+    \end{itemize}
+    \item \textbf{Kernel Trick:}
+    \begin{itemize}
+        \item Projects data into higher-dimensional space to handle non-linear separations.
+        \item Uses kernel functions to compute inner products in transformed space without explicit mapping.
+        \item Common kernels: Linear, Polynomial, Radial Basis Function (RBF), Sigmoid.
+    \end{itemize}
+\end{itemize}
+
+\subsection{Introduction}
+
+\begin{itemize}
+    \item Support Vector Machines (SVM) are supervised learning models used for classification and regression tasks.
+    \item SVM aims to find a hyperplane that best separates classes in the feature space.
+    \item The optimal hyperplane is the one that maximizes the margin between the classes.
+    \item Key concepts:
+    \begin{itemize}
+        \item \textbf{Margin:} The distance between the hyperplane and the nearest data points from each class.
+        \item \textbf{Support Vectors:} The data points that lie closest to the hyperplane and influence its position.
+    \end{itemize}
+\end{itemize}
+
+\subsection{Hard-Margin SVM}
+
+\subsubsection{Assumptions and Definitions}
+
+\begin{itemize}
+    \item Applicable when data is linearly separable.
+    \item Goal: Find a hyperplane that separates the classes with maximum margin.
+    \item Linear classifier is defined as:
+    \[
+    f(\mathbf{x}) = \mathbf{w}^\top \mathbf{x} + b
+    \]
+    where:
+    \begin{itemize}
+        \item $\mathbf{w}$ is the weight vector (normal to the hyperplane).
+        \item $b$ is the bias term.
+    \end{itemize}
+    \item Decision rule:
+    \[
+    \text{Predict class } \begin{cases}
+    +1 & \text{if } f(\mathbf{x}) \geq 0 \\
+    -1 & \text{if } f(\mathbf{x}) < 0
+    \end{cases}
+    \]
+\end{itemize}
+
+\subsubsection{Optimization Problem}
+
+\begin{itemize}
+    \item The margin is defined as $\dfrac{2}{\|\mathbf{w}\|}$.
+    \item To maximize the margin, we minimize $\|\mathbf{w}\|$ subject to correct classification.
+    \item Constraints for all training samples $(\mathbf{x}_i, y_i)$:
+    \[
+    y_i (\mathbf{w}^\top \mathbf{x}_i + b) \geq 1
+    \]
+    \item The optimization problem becomes:
+    \[
+    \begin{aligned}
+    & \underset{\mathbf{w}, b}{\text{minimize}} && \frac{1}{2} \|\mathbf{w}\|^2 \\
+    & \text{subject to} && y_i (\mathbf{w}^\top \mathbf{x}_i + b) \geq 1, \quad \forall i
+    \end{aligned}
+    \]
+\end{itemize}
+
+\subsubsection{Support Vectors}
+
+\begin{itemize}
+    \item Support vectors are the data points that lie on the margin boundaries (i.e., satisfy $y_i (\mathbf{w}^\top \mathbf{x}_i + b) = 1$).
+    \item These points directly influence the position and orientation of the hyperplane.
+    \item Data points further away from the hyperplane do not affect the solution.
+\end{itemize}
+
+\subsection{Soft-Margin SVM}
+
+\subsubsection{Motivation}
+
+\begin{itemize}
+    \item Real-world data is often not perfectly linearly separable.
+    \item Hard-margin SVM cannot handle misclassifications or noisy data.
+    \item Soft-margin SVM introduces slack variables to allow some misclassifications.
+\end{itemize}
+
+\subsubsection{Mathematical Formulation}
+
+\begin{itemize}
+    \item Introduce slack variables $\xi_i \geq 0$ to allow violations of the margin constraints.
+    \item Modified constraints:
+    \[
+    y_i (\mathbf{w}^\top \mathbf{x}_i + b) \geq 1 - \xi_i
+    \]
+    \item The optimization problem becomes:
+    \[
+    \begin{aligned}
+    & \underset{\mathbf{w}, b, \boldsymbol{\xi}}{\text{minimize}} && \frac{1}{2} \|\mathbf{w}\|^2 + C \sum_{i=1}^n \xi_i \\
+    & \text{subject to} && y_i (\mathbf{w}^\top \mathbf{x}_i + b) \geq 1 - \xi_i, \quad \forall i \\
+    &&& \xi_i \geq 0, \quad \forall i
+    \end{aligned}
+    \]
+    where:
+    \begin{itemize}
+        \item $C > 0$ is the regularization parameter controlling the trade-off between margin maximization and classification error.
+    \end{itemize}
+\end{itemize}
+
+\subsubsection{Regularization Parameter $C$}
+
+\begin{itemize}
+    \item A large $C$ assigns a higher penalty to misclassifications, leading to a smaller margin.
+    \item A small $C$ allows more misclassifications, leading to a larger margin.
+    \item $C$ controls the bias-variance trade-off:
+    \begin{itemize}
+        \item High $C$: Low bias, high variance.
+        \item Low $C$: High bias, low variance.
+    \end{itemize}
+\end{itemize}
+
+\subsection{Non-linear SVM and the Kernel Trick}
+
+\subsubsection{Feature Transformation}
+
+\begin{itemize}
+    \item Linear SVMs cannot handle non-linearly separable data in the original feature space.
+    \item Idea: Map data to a higher-dimensional feature space where it becomes linearly separable.
+    \item Mapping function $\phi: \mathbb{R}^n \rightarrow \mathbb{R}^N$, where $N > n$.
+\end{itemize}
+
+\subsubsection{Kernel Trick}
+
+\begin{itemize}
+    \item Computing $\phi(\mathbf{x})$ explicitly can be computationally expensive or infeasible.
+    \item The kernel trick allows computation of inner products in the high-dimensional space without explicit mapping.
+    \item Kernel function $K(\mathbf{x}_i, \mathbf{x}_j) = \phi(\mathbf{x}_i)^\top \phi(\mathbf{x}_j)$.
+    \item The optimization problem depends only on inner products of the form $\mathbf{x}_i^\top \mathbf{x}_j$, which can be replaced with $K(\mathbf{x}_i, \mathbf{x}_j)$.
+\end{itemize}
+
+\subsubsection{Common Kernel Functions}
+
+\begin{itemize}
+    \item \textbf{Linear Kernel:}
+    \[
+    K(\mathbf{x}_i, \mathbf{x}_j) = \mathbf{x}_i^\top \mathbf{x}_j
+    \]
+    \item \textbf{Polynomial Kernel:}
+    \[
+    K(\mathbf{x}_i, \mathbf{x}_j) = (\gamma \mathbf{x}_i^\top \mathbf{x}_j + r)^d
+    \]
+    where $\gamma$, $r$, and $d$ are kernel parameters.
+    \item \textbf{Radial Basis Function (RBF) Kernel:}
+    \[
+    K(\mathbf{x}_i, \mathbf{x}_j) = \exp\left( -\gamma \| \mathbf{x}_i - \mathbf{x}_j \|^2 \right)
+    \]
+    where $\gamma > 0$ is a kernel parameter.
+    \item \textbf{Sigmoid Kernel:}
+    \[
+    K(\mathbf{x}_i, \mathbf{x}_j) = \tanh(\gamma \mathbf{x}_i^\top \mathbf{x}_j + r)
+    \]
+\end{itemize}
+
+\subsection{Dual Formulation}
+
+\begin{itemize}
+    \item The SVM optimization problem can be expressed in its dual form, which depends only on the inner products of data points.
+    \item Dual problem for soft-margin SVM:
+    \[
+    \begin{aligned}
+    & \underset{\boldsymbol{\alpha}}{\text{maximize}} && \sum_{i=1}^n \alpha_i - \frac{1}{2} \sum_{i=1}^n \sum_{j=1}^n \alpha_i \alpha_j y_i y_j K(\mathbf{x}_i, \mathbf{x}_j) \\
+    & \text{subject to} && 0 \leq \alpha_i \leq C, \quad \forall i \\
+    &&& \sum_{i=1}^n \alpha_i y_i = 0
+    \end{aligned}
+    \]
+    \item The decision function becomes:
+    \[
+    f(\mathbf{x}) = \sum_{i=1}^n \alpha_i y_i K(\mathbf{x}_i, \mathbf{x}) + b
+    \]
+    \item Only support vectors (data points with $\alpha_i > 0$) contribute to the decision function.
+\end{itemize}
+
+\subsection{SVM in Practice}
+
+\subsubsection{Pros}
+
+\begin{itemize}
+    \item Effective in high-dimensional spaces.
+    \item Works well when the number of features exceeds the number of samples.
+    \item Uses a subset of training points (support vectors), making it memory efficient.
+    \item Flexible with different kernel functions for various data types.
+\end{itemize}
+
+\subsubsection{Cons}
+
+\begin{itemize}
+    \item Can be computationally intensive for large datasets.
+    \item Choosing the right kernel and hyperparameters can be challenging.
+    \item SVMs do not provide direct probability estimates (though methods exist to approximate them).
+\end{itemize}
+
+\subsubsection{Practical Considerations}
+
+\begin{itemize}
+    \item \textbf{Hyperparameter Tuning:}
+    \begin{itemize}
+        \item Regularization parameter $C$ and kernel parameters (e.g., $\gamma$ in RBF kernel) need to be tuned using methods like cross-validation.
+    \end{itemize}
+    \item \textbf{Feature Scaling:}
+    \begin{itemize}
+        \item Feature scaling is important as SVMs are sensitive to the scale of the inputs.
+    \end{itemize}
+    \item \textbf{Class Imbalance:}
+    \begin{itemize}
+        \item SVMs may perform poorly when classes are imbalanced; techniques like class weighting can be used.
+    \end{itemize}
+\end{itemize}
+
+\subsection{Conclusion}
+
+\begin{itemize}
+    \item SVMs are powerful tools for classification and regression tasks.
+    \item The use of kernel functions allows SVMs to model complex, non-linear relationships.
+    \item Proper tuning and consideration of practical aspects are essential for achieving good performance.
+\end{itemize}i
+
 \end{document}
