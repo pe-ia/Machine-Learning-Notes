@@ -1179,6 +1179,320 @@ Case 3 & 2.27\% & 0.63\% & 2.20\% & 0.87\% & 0.60\% \\
     \item Consider the costs associated with different types of errors when selecting thresholds and metrics.
 \end{itemize}
 
+\section{Principal Component Analysis (PCA) and Dimensionality Reduction}
+
+\textbf{Oversimplified TLDR:}
+\begin{itemize}
+    \item \textbf{PCA} is an unsupervised technique used to reduce the dimensionality of high-dimensional datasets while preserving as much variance as possible.
+    \item It identifies new orthogonal axes (principal components) that capture the maximum variance in the data.
+    \item The first principal component accounts for the largest possible variance, the second for the next largest, and so on.
+    \item PCA helps in data visualization, noise reduction, and feature extraction by transforming data to a lower-dimensional space.
+\end{itemize}
+
+\subsection{Introduction to PCA}
+
+\begin{itemize}
+    \item High-dimensional datasets often pose challenges in terms of computation, visualization, and overfitting.
+    \item PCA is an unsupervised linear transformation technique that projects data onto a lower-dimensional subspace.
+    \item The goal is to find the directions (principal components) that maximize the variance in the data.
+    \item PCA is widely used for:
+    \begin{itemize}
+        \item Data visualization in two or three dimensions.
+        \item Reducing the number of features for computational efficiency.
+        \item Identifying patterns and correlations in data.
+    \end{itemize}
+\end{itemize}
+
+\subsection{Mathematical Foundation of PCA}
+
+\begin{itemize}
+    \item Given a dataset with $n$ observations and $p$ features, represented as $\mathbf{X} \in \mathbb{R}^{n \times p}$.
+    \item The data is centered by subtracting the mean of each feature:
+    \[
+    \tilde{\mathbf{X}} = \mathbf{X} - \overline{\mathbf{X}}
+    \]
+    where $\overline{\mathbf{X}}$ is the mean vector of the features.
+    \item The covariance matrix $\mathbf{S}$ of the centered data is:
+    \[
+    \mathbf{S} = \frac{1}{n-1} \tilde{\mathbf{X}}^\top \tilde{\mathbf{X}}
+    \]
+    \item PCA involves solving the eigenvalue decomposition of the covariance matrix:
+    \[
+    \mathbf{S} \mathbf{a}_k = \lambda_k \mathbf{a}_k
+    \]
+    where:
+    \begin{itemize}
+        \item $\lambda_k$ is the $k$-th eigenvalue.
+        \item $\mathbf{a}_k$ is the corresponding eigenvector (principal component).
+    \end{itemize}
+    \item The eigenvalues represent the amount of variance captured by each principal component.
+\end{itemize}
+
+\subsection{Derivation of Principal Components}
+
+\begin{itemize}
+    \item \textbf{Goal}: Find a unit vector $\mathbf{a}_1$ such that the projection of the data onto $\mathbf{a}_1$ maximizes the variance:
+    \[
+    \max_{\mathbf{a}_1} \operatorname{Var}(\mathbf{a}_1^\top \tilde{\mathbf{X}})
+    \]
+    subject to $\|\mathbf{a}_1\| = 1$.
+    \item The variance of the projected data is:
+    \[
+    \operatorname{Var}(\mathbf{a}_1^\top \tilde{\mathbf{X}}) = \mathbf{a}_1^\top \mathbf{S} \mathbf{a}_1
+    \]
+    \item Using the method of Lagrange multipliers, we set up the objective function:
+    \[
+    L(\mathbf{a}_1, \lambda) = \mathbf{a}_1^\top \mathbf{S} \mathbf{a}_1 - \lambda (\mathbf{a}_1^\top \mathbf{a}_1 - 1)
+    \]
+    \item Taking the derivative with respect to $\mathbf{a}_1$ and setting it to zero:
+    \[
+    \frac{\partial L}{\partial \mathbf{a}_1} = 2\mathbf{S} \mathbf{a}_1 - 2\lambda \mathbf{a}_1 = 0
+    \]
+    \item This leads to the eigenvalue equation:
+    \[
+    \mathbf{S} \mathbf{a}_1 = \lambda \mathbf{a}_1
+    \]
+    \item The eigenvector $\mathbf{a}_1$ corresponding to the largest eigenvalue $\lambda_1$ is the first principal component.
+\end{itemize}
+
+\subsection{Subsequent Principal Components}
+
+\begin{itemize}
+    \item After finding the first principal component, subsequent components are found by maximizing the variance in directions orthogonal to the previous components.
+    \item For the $k$-th principal component $\mathbf{a}_k$, the optimization problem is:
+    \[
+    \max_{\mathbf{a}_k} \mathbf{a}_k^\top \mathbf{S} \mathbf{a}_k
+    \]
+    subject to:
+    \begin{align*}
+    \|\mathbf{a}_k\| &= 1 \\
+    \mathbf{a}_k^\top \mathbf{a}_j &= 0 \quad \text{for } j = 1, \dots, k-1
+    \end{align*}
+    \item This ensures that all principal components are orthogonal (uncorrelated).
+\end{itemize}
+
+\subsection{Principal Component Scores}
+
+\begin{itemize}
+    \item The principal component scores for observation $i$ are calculated as:
+    \[
+    z_{ik} = \mathbf{a}_k^\top (\mathbf{x}_i - \overline{\mathbf{x}})
+    \]
+    where $\mathbf{x}_i$ is the $i$-th observation.
+    \item The scores represent the coordinates of the data in the new principal component space.
+\end{itemize}
+
+\subsection{Reconstruction of Data}
+
+\begin{itemize}
+    \item The original data can be reconstructed from the principal components:
+    \[
+    \mathbf{x}_i = \overline{\mathbf{x}} + \sum_{k=1}^p z_{ik} \mathbf{a}_k
+    \]
+    \item By using only the first $m < p$ principal components, we obtain an approximation:
+    \[
+    \tilde{\mathbf{x}}_i = \overline{\mathbf{x}} + \sum_{k=1}^m z_{ik} \mathbf{a}_k
+    \]
+    \item The approximation minimizes the reconstruction error in the least-squares sense.
+\end{itemize}
+
+\subsection{Explained Variance and Choosing the Number of Components}
+
+\begin{itemize}
+    \item The total variance in the data is the sum of the variances of all principal components:
+    \[
+    \text{Total Variance} = \sum_{k=1}^p \lambda_k
+    \]
+    \item The proportion of variance explained by the $k$-th principal component is:
+    \[
+    \text{Proportion Variance Explained} = \frac{\lambda_k}{\sum_{j=1}^p \lambda_j}
+    \]
+    \item A Scree plot can be used to visualize the explained variance and determine an appropriate number of components.
+    \item Common criteria for choosing $m$:
+    \begin{itemize}
+        \item Cumulative explained variance reaches a threshold (e.g., 90\%).
+        \item The point of diminishing returns in the Scree plot (elbow method).
+    \end{itemize}
+\end{itemize}
+
+\subsection{Data Visualization using PCA}
+
+\begin{itemize}
+    \item PCA can reduce high-dimensional data to two or three dimensions for visualization.
+    \item Scatter plots of the first two or three principal components can reveal patterns, clusters, or outliers.
+    \item Biplots combine scores and loadings to display both observations and variables in the principal component space.
+    \item In a biplot:
+    \begin{itemize}
+        \item Points represent observations projected onto the principal components.
+        \item Vectors represent variables, showing their contributions (loadings) to the components.
+        \item The angle between vectors indicates the correlation between variables.
+    \end{itemize}
+\end{itemize}
+
+\subsection{Centering and Scaling}
+
+\begin{itemize}
+    \item Centering the data (subtracting the mean) is essential for PCA to ensure that the first principal component describes the direction of maximum variance.
+    \item Scaling (standardizing) the data is important when variables are measured in different units or have different variances.
+    \item Without scaling, variables with larger variances may dominate the principal components.
+    \item Standardization transforms each feature to have zero mean and unit variance:
+    \[
+    \tilde{x}_{ij} = \frac{x_{ij} - \overline{x}_j}{s_j}
+    \]
+    where $s_j$ is the standard deviation of feature $j$.
+\end{itemize}
+
+\subsection{PCA Approximations and Reconstruction Error}
+
+\begin{itemize}
+    \item The reconstruction error when approximating data using the first $m$ principal components is:
+    \[
+    E = \sum_{k=m+1}^p \lambda_k
+    \]
+    \item This error represents the variance not captured by the selected components.
+    \item Minimizing the reconstruction error is equivalent to capturing the maximum variance with fewer components.
+\end{itemize}
+
+\subsection{PCA and the Singular Value Decomposition (SVD)}
+
+\begin{itemize}
+    \item PCA can also be computed using the Singular Value Decomposition of the data matrix.
+    \item For the centered data matrix $\tilde{\mathbf{X}}$:
+    \[
+    \tilde{\mathbf{X}} = \mathbf{U} \mathbf{\Sigma} \mathbf{V}^\top
+    \]
+    where:
+    \begin{itemize}
+        \item $\mathbf{U} \in \mathbb{R}^{n \times p}$ contains the left singular vectors.
+        \item $\mathbf{\Sigma} \in \mathbb{R}^{p \times p}$ is a diagonal matrix with singular values.
+        \item $\mathbf{V} \in \mathbb{R}^{p \times p}$ contains the right singular vectors.
+    \end{itemize}
+    \item The principal components are related to the right singular vectors:
+    \[
+    \mathbf{a}_k = \mathbf{v}_k
+    \]
+    \item The singular values are related to the square roots of the eigenvalues:
+    \[
+    \sigma_k = \sqrt{\lambda_k}
+    \]
+\end{itemize}
+
+\subsection{Practical Considerations}
+
+\begin{itemize}
+    \item \textbf{Interpretation of Principal Components}:
+    \begin{itemize}
+        \item The loadings indicate the contribution of each original variable to the principal components.
+        \item Understanding the loadings helps in interpreting the meaning of each principal component.
+    \end{itemize}
+    \item \textbf{Assumptions and Limitations}:
+    \begin{itemize}
+        \item PCA assumes linear relationships between variables.
+        \item It is sensitive to outliers, which can distort the variance structure.
+        \item PCA captures variance, not necessarily the features important for classification or prediction.
+    \end{itemize}
+    \item \textbf{Centering and Scaling Decisions}:
+    \begin{itemize}
+        \item Deciding whether to scale variables depends on the context and the importance of preserving the original units.
+        \item If all variables are on the same scale and variance, scaling may not be necessary.
+    \end{itemize}
+    \item \textbf{Missing Data}:
+    \begin{itemize}
+        \item PCA requires a complete dataset; missing values must be handled appropriately.
+        \item Techniques include imputation or using algorithms that can handle missing data.
+    \end{itemize}
+    \item \textbf{Software Implementation}:
+    \begin{itemize}
+        \item PCA is available in many statistical software packages and libraries.
+        \item Ensure that the implementation matches the intended use (e.g., centered vs. uncentered PCA).
+    \end{itemize}
+\end{itemize}
+
+\subsection{PCA for Sphering (Whitening) Data}
+
+\begin{itemize}
+    \item Sphering transforms data to have zero mean and identity covariance matrix.
+    \item Steps to sphere data using PCA:
+    \begin{enumerate}
+        \item Center the data: $\tilde{\mathbf{X}} = \mathbf{X} - \overline{\mathbf{X}}$.
+        \item Compute the eigenvalue decomposition: $\mathbf{S} = \mathbf{A} \mathbf{\Lambda} \mathbf{A}^\top$.
+        \item Transform the data: $\mathbf{Z} = \mathbf{\Lambda}^{-1/2} \mathbf{A}^\top \tilde{\mathbf{X}}^\top$.
+    \end{enumerate}
+    \item The transformed data $\mathbf{Z}$ has uncorrelated features with unit variance.
+\end{itemize}
+
+\subsection{Applications of PCA}
+
+\begin{itemize}
+    \item \textbf{Noise Reduction}:
+    \begin{itemize}
+        \item By retaining components with significant variance, PCA can filter out noise.
+    \end{itemize}
+    \item \textbf{Feature Extraction}:
+    \begin{itemize}
+        \item PCA can create new features (principal components) that may be more effective for modeling.
+    \end{itemize}
+    \item \textbf{Data Compression}:
+    \begin{itemize}
+        \item Reducing dimensionality reduces storage space and computational cost.
+    \end{itemize}
+    \item \textbf{Anomaly Detection}:
+    \begin{itemize}
+        \item Observations that deviate significantly in the principal component space may be outliers.
+    \end{itemize}
+\end{itemize}
+
+\subsection{Limitations of PCA}
+
+\begin{itemize}
+    \item \textbf{Linearity}:
+    \begin{itemize}
+        \item PCA captures linear relationships; nonlinear structures may not be well-represented.
+    \end{itemize}
+    \item \textbf{Interpretability}:
+    \begin{itemize}
+        \item Principal components are linear combinations of original features, which may be hard to interpret.
+    \end{itemize}
+    \item \textbf{Scaling Sensitivity}:
+    \begin{itemize}
+        \item PCA is sensitive to the scaling of variables; inappropriate scaling can mislead the analysis.
+    \end{itemize}
+    \item \textbf{Outliers}:
+    \begin{itemize}
+        \item Outliers can disproportionately affect the principal components.
+    \end{itemize}
+\end{itemize}
+
+\subsection{Alternatives and Extensions to PCA}
+
+\begin{itemize}
+    \item \textbf{Kernel PCA}:
+    \begin{itemize}
+        \item Extends PCA to capture nonlinear structures using kernel functions.
+    \end{itemize}
+    \item \textbf{Independent Component Analysis (ICA)}:
+    \begin{itemize}
+        \item Decomposes data into statistically independent components, useful for source separation.
+    \end{itemize}
+    \item \textbf{Factor Analysis}:
+    \begin{itemize}
+        \item Assumes an underlying latent variable model explaining the observed variables.
+    \end{itemize}
+    \item \textbf{t-Distributed Stochastic Neighbor Embedding (t-SNE)}:
+    \begin{itemize}
+        \item Nonlinear dimensionality reduction technique for visualization of high-dimensional data.
+    \end{itemize}
+\end{itemize}
+
+\subsection{Summary}
+
+\begin{itemize}
+    \item PCA is a powerful tool for dimensionality reduction, capturing the most significant variance in data.
+    \item By transforming to a new set of uncorrelated variables, PCA simplifies the structure of data.
+    \item Appropriate application of PCA requires careful consideration of data scaling, centering, and the interpretation of results.
+    \item While PCA has limitations, it remains a fundamental technique in data analysis and machine learning.
+\end{itemize}
+
 \section{Ensemble Methods: Bagging, Random Forests, and Boosting}
 
 \textbf{Oversimplified TLDR:}
