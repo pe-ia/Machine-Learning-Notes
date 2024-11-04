@@ -1493,6 +1493,479 @@ Case 3 & 2.27\% & 0.63\% & 2.20\% & 0.87\% & 0.60\% \\
     \item While PCA has limitations, it remains a fundamental technique in data analysis and machine learning.
 \end{itemize}
 
+\section{Clustering}
+
+\textbf{Oversimplified TLDR:}
+\begin{itemize}
+    \item Clustering aims to discover inherent groupings in unlabeled data.
+    \item \textbf{K-means Clustering:}
+    \begin{itemize}
+        \item Partitions data into $K$ non-overlapping clusters.
+        \item Minimizes within-cluster variance by iteratively updating cluster assignments and centroids.
+        \item Sensitive to the initial choice of centroids and the value of $K$.
+    \end{itemize}
+    \item \textbf{Hierarchical Clustering:}
+    \begin{itemize}
+        \item Builds a tree-like structure (dendrogram) representing data groupings at different levels.
+        \item Does not require pre-specifying the number of clusters.
+        \item Can be agglomerative (bottom-up) or divisive (top-down).
+    \end{itemize}
+    \item \textbf{Evaluation:}
+    \begin{itemize}
+        \item Silhouette score assesses the quality of clustering by measuring how similar an object is to its own cluster compared to other clusters.
+        \item High silhouette scores indicate well-separated clusters.
+    \end{itemize}
+\end{itemize}
+
+\subsection{Cluster Analysis}
+
+\begin{itemize}
+    \item Cluster analysis involves grouping data points such that points within a cluster are similar and points in different clusters are dissimilar.
+    \item It is an unsupervised learning technique since it deals with unlabeled data.
+    \item Choosing the appropriate number of clusters $K$ is a critical part of the analysis.
+    \item Visualization can sometimes be more effective than clustering algorithms for identifying groupings.
+\end{itemize}
+
+\subsection{K-means Clustering}
+
+\begin{itemize}
+    \item K-means clustering partitions the data into $K$ clusters $C_1, C_2, \dots, C_K$ by minimizing the total within-cluster variance.
+    \item The objective function to minimize is:
+    \[
+    \underset{C_1, \dots, C_K}{\text{minimize}} \sum_{k=1}^{K} W(C_k)
+    \]
+    where $W(C_k)$ measures the within-cluster variation.
+    \item A common choice for $W(C_k)$ is the sum of squared distances between data points and the cluster centroid:
+    \[
+    W(C_k) = \sum_{\boldsymbol{x}_i \in C_k} \left\| \boldsymbol{x}_i - \boldsymbol{r}_k \right\|^2
+    \]
+    where $\boldsymbol{r}_k$ is the centroid of cluster $C_k$.
+    \item The centroid $\boldsymbol{r}_k$ is calculated as the mean of all points in the cluster:
+    \[
+    \boldsymbol{r}_k = \frac{1}{|C_k|} \sum_{\boldsymbol{x}_i \in C_k} \boldsymbol{x}_i
+    \]
+\end{itemize}
+
+\subsubsection{The K-means Algorithm}
+
+\begin{enumerate}
+    \item \textbf{Initialization:} Choose $K$ initial cluster centroids, possibly by selecting $K$ random data points.
+    \item \textbf{Assignment Step:} Assign each data point to the nearest centroid:
+    \[
+    \text{Assign } \boldsymbol{x}_i \text{ to cluster } C_k \text{ where } k = \underset{j}{\arg\min} \left\| \boldsymbol{x}_i - \boldsymbol{r}_j \right\|^2
+    \]
+    \item \textbf{Update Step:} Recalculate the centroids based on the current cluster assignments:
+    \[
+    \boldsymbol{r}_k = \frac{1}{|C_k|} \sum_{\boldsymbol{x}_i \in C_k} \boldsymbol{x}_i
+    \]
+    \item \textbf{Convergence Check:} Repeat steps 2 and 3 until the centroids no longer change significantly or a maximum number of iterations is reached.
+\end{enumerate}
+
+\subsubsection{Convergence and Initialization}
+
+\begin{itemize}
+    \item The K-means algorithm is guaranteed to converge in a finite number of iterations since there are a finite number of possible cluster assignments.
+    \item It may converge to a local minimum rather than the global minimum of the objective function.
+    \item Multiple runs with different initial centroids can help find a better clustering solution.
+\end{itemize}
+
+\subsubsection{Factors Affecting K-means Clustering}
+
+\begin{itemize}
+    \item \textbf{Choice of $K$:} The number of clusters must be specified in advance, and different values can lead to different clusterings.
+    \item \textbf{Scale of Variables:} Features with larger scales can dominate the distance calculations; standardization is often necessary.
+    \item \textbf{Outliers:} Outliers can significantly affect the cluster centroids; consider removing or treating outliers.
+    \item \textbf{Dimensionality:} High-dimensional data can make distance measures less meaningful; dimensionality reduction techniques like PCA may help.
+\end{itemize}
+
+\subsubsection{Evaluating Clustering Results}
+
+\textbf{Silhouette Score:}
+
+\begin{itemize}
+    \item For each data point $\boldsymbol{x}_i$, calculate:
+    \begin{itemize}
+        \item \textbf{Mean Intra-cluster Distance:}
+        \[
+        a(\boldsymbol{x}_i) = \frac{1}{|C_k| - 1} \sum_{\boldsymbol{x}_j \in C_k, \boldsymbol{x}_j \neq \boldsymbol{x}_i} d(\boldsymbol{x}_i, \boldsymbol{x}_j)
+        \]
+        where $C_k$ is the cluster containing $\boldsymbol{x}_i$ and $d(\cdot, \cdot)$ is the distance measure.
+        \item \textbf{Mean Nearest-cluster Distance:}
+        \[
+        b(\boldsymbol{x}_i) = \min_{C_l \neq C_k} \left( \frac{1}{|C_l|} \sum_{\boldsymbol{x}_j \in C_l} d(\boldsymbol{x}_i, \boldsymbol{x}_j) \right)
+        \]
+    \end{itemize}
+    \item The silhouette score for $\boldsymbol{x}_i$ is:
+    \[
+    s(\boldsymbol{x}_i) = \frac{b(\boldsymbol{x}_i) - a(\boldsymbol{x}_i)}{\max \left\{ a(\boldsymbol{x}_i), b(\boldsymbol{x}_i) \right\}}
+    \]
+    \item The silhouette score ranges from $-1$ to $1$:
+    \begin{itemize}
+        \item $s(\boldsymbol{x}_i) \approx 1$: Data point is well matched to its own cluster and poorly matched to neighboring clusters.
+        \item $s(\boldsymbol{x}_i) \approx 0$: Data point lies between clusters.
+        \item $s(\boldsymbol{x}_i) \approx -1$: Data point may have been assigned to the wrong cluster.
+    \end{itemize}
+    \item The average silhouette score over all data points provides an overall measure of clustering quality.
+\end{itemize}
+
+\subsection{Hierarchical Clustering}
+
+\begin{itemize}
+    \item Hierarchical clustering builds a hierarchy of clusters without requiring a pre-specified number of clusters.
+    \item The result is typically visualized using a \textbf{dendrogram}, which illustrates the arrangement of the clusters produced by either agglomerative or divisive methods.
+\end{itemize}
+
+\subsubsection{Agglomerative vs. Divisive Strategies}
+
+\begin{itemize}
+    \item \textbf{Agglomerative (Bottom-Up) Clustering:}
+    \begin{itemize}
+        \item Starts with each data point as a singleton cluster.
+        \item Iteratively merges the two closest clusters until all points are in a single cluster.
+    \end{itemize}
+    \item \textbf{Divisive (Top-Down) Clustering:}
+    \begin{itemize}
+        \item Starts with all data points in one cluster.
+        \item Iteratively splits clusters into smaller clusters based on dissimilarity.
+    \end{itemize}
+\end{itemize}
+
+\subsubsection{Measuring Dissimilarity Between Clusters}
+
+\begin{itemize}
+    \item The choice of linkage criterion determines how the distance between clusters is calculated.
+    \item \textbf{Single Linkage:}
+    \[
+    D(C_i, C_j) = \min \left\{ d(\boldsymbol{x}, \boldsymbol{y}) \mid \boldsymbol{x} \in C_i, \boldsymbol{y} \in C_j \right\}
+    \]
+    \item \textbf{Complete Linkage:}
+    \[
+    D(C_i, C_j) = \max \left\{ d(\boldsymbol{x}, \boldsymbol{y}) \mid \boldsymbol{x} \in C_i, \boldsymbol{y} \in C_j \right\}
+    \]
+    \item \textbf{Average Linkage:}
+    \[
+    D(C_i, C_j) = \frac{1}{|C_i||C_j|} \sum_{\boldsymbol{x} \in C_i} \sum_{\boldsymbol{y} \in C_j} d(\boldsymbol{x}, \boldsymbol{y})
+    \]
+    \item Common distance measures $d(\boldsymbol{x}, \boldsymbol{y})$ include Euclidean distance, Manhattan distance, etc.
+\end{itemize}
+
+\subsubsection{Dendrograms}
+
+\begin{itemize}
+    \item A dendrogram is a tree-like diagram that records the sequences of merges or splits.
+    \item The vertical axis represents the distance or dissimilarity at which clusters are merged or split.
+    \item By "cutting" the dendrogram at a particular height, we obtain a clustering corresponding to that level of dissimilarity.
+\end{itemize}
+
+\subsubsection{Interpreting Dendrograms}
+
+\begin{itemize}
+    \item Clusters joined at lower heights are more similar than those joined at higher heights.
+    \item The dendrogram helps in deciding the number of clusters by visualizing where large increases in dissimilarity occur.
+    \item It is important to note that proximity in the dendrogram does not always correspond to proximity in the original feature space.
+\end{itemize}
+
+\subsection{Soft vs. Hard Clustering}
+
+\begin{itemize}
+    \item \textbf{Hard Clustering:} Each data point is assigned to exactly one cluster (e.g., K-means, hierarchical clustering).
+    \item \textbf{Soft Clustering:} Assigns a probability or degree of membership of each data point to clusters (e.g., Gaussian Mixture Models).
+    \item Soft clustering provides more nuanced information about data point affiliations.
+\end{itemize}
+
+\subsection{Clustering as Data Reduction}
+
+\begin{itemize}
+    \item Clustering can be used to reduce the complexity of data by representing clusters with prototype points (e.g., centroids).
+    \item This approach can simplify tasks like nearest-neighbor classification by reducing the number of comparisons.
+    \item For example, instead of using all training data in K-nearest neighbors, one can use cluster centroids as representative points.
+\end{itemize}
+
+\subsection{Practical Considerations}
+
+\begin{itemize}
+    \item \textbf{Preprocessing:}
+    \begin{itemize}
+        \item Feature scaling is crucial, especially for distance-based clustering methods.
+        \item Dimensionality reduction techniques (like PCA) can help mitigate the curse of dimensionality.
+    \end{itemize}
+    \item \textbf{Algorithm Selection:}
+    \begin{itemize}
+        \item The choice between K-means and hierarchical clustering depends on the data size and the desired clustering granularity.
+        \item Hierarchical clustering is more computationally intensive but provides a full hierarchy of clusters.
+    \end{itemize}
+    \item \textbf{Validation:}
+    \begin{itemize}
+        \item Internal validation measures (e.g., silhouette score) help assess clustering quality without ground truth labels.
+        \item External validation requires labeled data to compare clustering results against known classes.
+    \end{itemize}
+\end{itemize}
+
+\section{Decision Trees}
+
+\textbf{Oversimplified TLDR:}
+
+\begin{itemize}
+    \item Decision Trees are supervised learning algorithms used for both classification and regression tasks.
+    \item They split the data into subsets based on the value of input features, creating a tree-like model of decisions.
+    \item \textbf{Key Characteristics:}
+    \begin{itemize}
+        \item Easy to interpret and visualize; can be visualized as a flowchart.
+        \item Handle both numerical and categorical data.
+        \item Non-parametric model that can capture complex, non-linear relationships.
+    \end{itemize}
+    \item \textbf{Limitations:}
+    \begin{itemize}
+        \item Prone to overfitting if not properly pruned.
+        \item Can create biased trees if some classes dominate.
+        \item Sensitive to small changes in the data (unstable).
+    \end{itemize}
+\end{itemize}
+
+\subsection{Introduction}
+
+\begin{itemize}
+    \item A Decision Tree is a flowchart-like structure where internal nodes represent tests on features, branches represent the outcome of the test, and leaf nodes represent the final output (class label or continuous value).
+    \item The model makes decisions by recursively partitioning the feature space into regions where the predicted value is homogeneous.
+    \item The process continues until a stopping criterion is met (e.g., maximum depth, minimum number of samples in a node).
+\end{itemize}
+
+\subsection{How Decision Trees Work}
+
+\subsubsection{Classification Example}
+
+\begin{itemize}
+    \item Consider a dataset with two features, $X_1$ and $X_2$, and two classes.
+    \item The goal is to classify new data points by partitioning the feature space using simple decision rules based on feature thresholds.
+    \item For instance:
+    \begin{enumerate}
+        \item If $X_2 > 10$, classify as Class A.
+        \item Else, if $X_1 > 5$, classify as Class B.
+        \item Else, classify as Class A.
+    \end{enumerate}
+    \item This forms a tree structure where each node represents a decision based on a feature, and each leaf node represents a class label.
+    \item The feature space is partitioned into regions corresponding to these rules.
+\end{itemize}
+
+\subsubsection{Regression Example}
+
+\begin{itemize}
+    \item In regression trees, the goal is to predict a continuous target variable.
+    \item Example: Predicting a baseball player's salary based on years of experience ($X_1$) and number of hits last year ($X_2$).
+    \item The tree partitions the feature space and assigns the average target value (salary) of the training samples in each region as the prediction.
+    \item For instance:
+    \begin{enumerate}
+        \item If $X_1 > 4.5$, predict the average salary of players with more than 4.5 years of experience.
+        \item Else, predict the average salary of players with 4.5 or fewer years of experience.
+    \end{enumerate}
+    \item This results in a piecewise constant prediction function.
+\end{itemize}
+
+\subsection{Decision Tree Terminology}
+
+\begin{itemize}
+    \item \textbf{Root Node:} The topmost node of the tree, representing the entire dataset.
+    \item \textbf{Internal Nodes:} Nodes that represent tests on features and have child nodes.
+    \item \textbf{Leaf Nodes (Terminal Nodes):} Nodes that represent the final output; they do not have any children.
+    \item \textbf{Branches (Edges):} Connections between nodes, representing the outcome of a test.
+    \item \textbf{Splitting:} The process of dividing a node into two or more sub-nodes.
+    \item \textbf{Parent and Child Nodes:} A node that is divided into sub-nodes is a parent, and the resulting nodes are children.
+    \item \textbf{Subtree:} A portion of the tree consisting of a node and its descendants.
+\end{itemize}
+
+\subsection{Training a Decision Tree}
+
+\begin{itemize}
+    \item Building a decision tree involves selecting the best splits at each node based on a certain criterion.
+    \item The goal is to create pure nodes where the target variable is as homogeneous as possible.
+    \item Since finding the optimal tree is computationally infeasible (NP-complete problem), we use a greedy algorithm to build the tree recursively.
+\end{itemize}
+
+\subsubsection{The Training Algorithm}
+
+\begin{enumerate}
+    \item \textbf{For each node:}
+    \begin{enumerate}
+        \item Evaluate all possible splits for each feature.
+        \item Use a criterion (e.g., reduction in impurity) to select the best split.
+        \item Split the node into child nodes based on the best split.
+    \end{enumerate}
+    \item \textbf{Recursively repeat} the process for each child node until a stopping condition is met (e.g., maximum depth, minimum number of samples).
+\end{enumerate}
+
+\subsubsection{Evaluating the Quality of a Split}
+
+\paragraph{For Regression Trees}
+
+\begin{itemize}
+    \item The quality of a split is evaluated using the \textbf{Residual Sum of Squares (RSS)}.
+    \item For a split $s$ that partitions the data at node $t$ into regions $R_1^{(s)}$ and $R_2^{(s)}$, the RSS is computed as:
+    \[
+    \mathrm{RSS} = \sum_{i: x_i \in R_1^{(s)}} (y_i - \bar{y}_{R_1^{(s)}})^2 + \sum_{i: x_i \in R_2^{(s)}} (y_i - \bar{y}_{R_2^{(s)}})^2
+    \]
+    where $\bar{y}_{R_1^{(s)}}$ and $\bar{y}_{R_2^{(s)}}$ are the mean target values in regions $R_1^{(s)}$ and $R_2^{(s)}$, respectively.
+    \item The split that results in the lowest RSS is selected.
+\end{itemize}
+
+\paragraph{For Classification Trees}
+
+\begin{itemize}
+    \item The quality of a split is evaluated using an \textbf{impurity measure} (e.g., Gini impurity, entropy).
+    \item For a node $t$ with $N_t$ samples, and a split $s$ that creates child nodes $t_L$ and $t_R$:
+    \begin{itemize}
+        \item Compute the impurity of each child node: $\Phi(t_L)$ and $\Phi(t_R)$.
+        \item Compute the weighted average impurity:
+        \[
+        \Phi_{\text{split}} = \frac{N_{t_L}}{N_t} \Phi(t_L) + \frac{N_{t_R}}{N_t} \Phi(t_R)
+        \]
+    \item The split that minimizes $\Phi_{\text{split}}$ is selected.
+    \end{itemize}
+    \item Alternatively, compute the \textbf{information gain}:
+    \[
+    \text{Information Gain} = \Phi(t) - \Phi_{\text{split}}
+    \]
+    \item The split that maximizes the information gain is selected.
+\end{itemize}
+
+\subsection{Impurity Measures}
+
+\begin{itemize}
+    \item An impurity measure quantifies the homogeneity of the target variable within a node.
+    \item Common impurity measures for classification trees include:
+    \begin{enumerate}
+        \item \textbf{Gini Impurity:}
+        \[
+        G(t) = 1 - \sum_{k=1}^K p_k^2
+        \]
+        where $p_k$ is the proportion of samples of class $k$ in node $t$, and $K$ is the number of classes.
+        \item \textbf{Entropy (Information Gain):}
+        \[
+        H(t) = -\sum_{k=1}^K p_k \log_2 p_k
+        \]
+        \item \textbf{Classification Error:}
+        \[
+        E(t) = 1 - \max_k p_k
+        \]
+    \end{enumerate}
+    \item These measures are maximized when the classes are equally mixed and minimized when the node is pure.
+\end{itemize}
+
+\subsubsection{Gini Impurity}
+
+\begin{itemize}
+    \item Gini impurity measures the probability of misclassifying a randomly chosen sample from the node if it were labeled according to the distribution of labels in the node.
+    \item For binary classification (two classes), the Gini impurity simplifies to:
+    \[
+    G(t) = 2 p (1 - p)
+    \]
+    where $p$ is the proportion of one of the classes.
+    \item Gini impurity ranges between 0 (pure node) and 0.5 (maximum impurity for binary classification).
+\end{itemize}
+
+\subsubsection{Entropy}
+
+\begin{itemize}
+    \item Entropy measures the expected amount of information needed to classify a randomly drawn sample.
+    \item It reaches its maximum when the classes are equally likely (most uncertain) and minimum when the node is pure.
+    \item For binary classification, entropy ranges between 0 and 1.
+\end{itemize}
+
+\subsubsection{Classification Error}
+
+\begin{itemize}
+    \item Classification error measures the fraction of samples that do not belong to the majority class in the node.
+    \item It is less sensitive to changes in the node probabilities compared to Gini impurity and entropy.
+    \item Due to its less sensitivity, it is less suitable for tree building but can be used for pruning.
+\end{itemize}
+
+\subsection{Advantages and Disadvantages}
+
+\subsubsection{Advantages}
+
+\begin{itemize}
+    \item \textbf{Interpretability:} Decision trees are easy to interpret and explain, making them suitable for situations where transparency is important.
+    \item \textbf{Versatility:} Can handle both numerical and categorical data.
+    \item \textbf{Non-parametric:} Do not assume any underlying distribution, can capture non-linear relationships.
+    \item \textbf{Efficiency:} Require relatively little data preparation, and the prediction time is fast, proportional to the depth of the tree.
+\end{itemize}
+
+\subsubsection{Disadvantages}
+
+\begin{itemize}
+    \item \textbf{Overfitting:} Decision trees can create overly complex trees that do not generalize well to unseen data.
+    \item \textbf{Instability:} Small changes in the data can lead to different splits and completely different trees.
+    \item \textbf{Bias:} Trees can be biased towards features with more levels (categorical features with many categories).
+\end{itemize}
+
+\subsection{Practical Considerations}
+
+\begin{itemize}
+    \item \textbf{Stopping Criteria:} To prevent overfitting, consider setting parameters like maximum depth, minimum number of samples per leaf, or minimum impurity decrease.
+    \item \textbf{Pruning:} Post-pruning can simplify the tree by removing branches that have little power in predicting the target variable.
+    \item \textbf{Feature Selection:} Decision trees perform implicit feature selection; however, they may favor features with more levels. Consider preprocessing steps to mitigate bias.
+    \item \textbf{Ensemble Methods:} Combining multiple trees (e.g., Random Forests, Gradient Boosting) can improve predictive performance and reduce overfitting.
+\end{itemize}
+
+\subsection{Decision Tree Structures}
+
+\subsubsection{Binary vs. Multi-way Splits}
+
+\begin{itemize}
+    \item \textbf{Binary Trees:} Each internal node splits the data into two subsets based on a feature threshold. Most common and preferred due to their simplicity.
+    \item \textbf{Multi-way Splits:} Nodes can split data into more than two subsets, which can be useful for categorical features with multiple levels but may lead to more complex trees.
+\end{itemize}
+
+\subsubsection{Feature Types}
+
+\begin{itemize}
+    \item Decision trees can handle both \textbf{continuous} (numerical) and \textbf{categorical} features.
+    \item For continuous features, splits are based on thresholds (e.g., $X_j \leq s$).
+    \item For categorical features, splits can be based on equality or membership in a subset of categories.
+\end{itemize}
+
+\subsection{Building a Decision Tree}
+
+\begin{enumerate}
+    \item \textbf{Select the Best Split:}
+    \begin{itemize}
+        \item For each feature, evaluate all possible splits.
+        \item For continuous features, consider all possible thresholds.
+        \item For categorical features, consider all possible subsets.
+        \item Use the impurity measure to select the split that best separates the data.
+    \end{itemize}
+    \item \textbf{Split the Node:}
+    \begin{itemize}
+        \item Partition the data into child nodes based on the selected split.
+    \end{itemize}
+    \item \textbf{Repeat Recursively:}
+    \begin{itemize}
+        \item Apply the same process to each child node.
+        \item Continue until a stopping criterion is met.
+    \end{itemize}
+    \item \textbf{Assign Predictions:}
+    \begin{itemize}
+        \item For classification, assign the majority class in the leaf node.
+        \item For regression, assign the mean target value in the leaf node.
+    \end{itemize}
+\end{enumerate}
+
+\subsection{Interpretability and Efficiency}
+
+\subsubsection{Interpretability}
+
+\begin{itemize}
+    \item Decision trees are highly interpretable due to their structure resembling human decision-making processes.
+    \item The set of decision rules can be easily extracted and understood.
+    \item This transparency makes them suitable for applications requiring explainability.
+\end{itemize}
+
+\subsubsection{Efficiency}
+
+\begin{itemize}
+    \item \textbf{Memory Efficiency:} Only the tree structure needs to be stored, not the entire dataset.
+    \item \textbf{Prediction Time:} Making a prediction involves traversing the tree from root to leaf, which has a time complexity of $O(\log_2 L)$ for a balanced tree with $L$ leaves.
+\end{itemize}
+
 \section{Ensemble Methods: Bagging, Random Forests, and Boosting}
 
 \textbf{Oversimplified TLDR:}
