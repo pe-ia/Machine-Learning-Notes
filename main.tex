@@ -1966,7 +1966,269 @@ Case 3 & 2.27\% & 0.63\% & 2.20\% & 0.87\% & 0.60\% \\
     \item \textbf{Prediction Time:} Making a prediction involves traversing the tree from root to leaf, which has a time complexity of $O(\log_2 L)$ for a balanced tree with $L$ leaves.
 \end{itemize}
 
-\section{Ensemble Methods: Bagging, Random Forests, and Boosting}
+\section{Decision Trees (continued) and Ensemble Methods}
+
+\textbf{Oversimplified TLDR:}
+
+\begin{itemize}
+    \item \textbf{Decision Trees:}
+    \begin{itemize}
+        \item Hierarchical models that split data based on feature values.
+        \item Prone to overfitting; can capture noise in the data.
+        \item Sensitive to small variations in data (high variance).
+        \item Not robust to rotations; scaling and shifting are acceptable.
+        \item Feature importance is derived from the top splits in the tree.
+    \end{itemize}
+    \item \textbf{Ensemble Methods:}
+    \begin{itemize}
+        \item Combine multiple models to improve overall performance.
+        \item Reduce variance (e.g., Bagging, Random Forests).
+        \item Reduce bias (e.g., Boosting).
+        \item Benefit from the wisdom of crowds under certain conditions.
+    \end{itemize}
+\end{itemize}
+
+\subsection{Decision Trees}
+
+\begin{itemize}
+    \item Decision Trees split data recursively based on feature values to predict the target variable.
+    \item The structure consists of nodes (decision points) and leaves (predictions).
+\end{itemize}
+
+\subsubsection{Feature Importance}
+
+\begin{itemize}
+    \item Features used at the top levels of the tree are considered more globally important.
+    \item Some features may not be used at all, effectively performing feature selection.
+\end{itemize}
+
+\subsubsection{Sensitivity to Data Transformations}
+
+\begin{itemize}
+    \item \textbf{Rotation:} Trees are sensitive to rotations of the feature space.
+    \item \textbf{Scaling:} Trees are invariant to scaling of features.
+    \item \textbf{Shifting:} Trees are invariant to shifting (adding constants to features).
+\end{itemize}
+
+\subsubsection{Instability and Variance}
+
+\begin{itemize}
+    \item Decision Trees can be unstable; small variations in data can lead to different trees.
+    \item High variance makes trees sensitive to noise and prone to overfitting.
+\end{itemize}
+
+\subsubsection{Handling Missing Features - Surrogate Splits}
+
+\begin{itemize}
+    \item Missing values are common in real-world datasets.
+    \item \textbf{Surrogate splits} are used when the best splitting feature is missing for some data points.
+    \item A surrogate feature is selected that closely mimics the original split.
+    \item This helps to handle missing values during both training and prediction.
+\end{itemize}
+
+\subsection{Building a Decision Tree}
+
+\begin{itemize}
+    \item Start with the entire dataset at the root node.
+    \item Recursively split the data:
+    \begin{itemize}
+        \item Try all possible splits on all features.
+        \item Use a criterion (e.g., Gini impurity, entropy) to evaluate splits.
+        \item Choose the split that best reduces impurity.
+    \end{itemize}
+    \item Continue splitting until a stopping condition is met.
+\end{itemize}
+
+\subsubsection{Stopping Conditions}
+
+\begin{itemize}
+    \item \textbf{Purity:} Stop when nodes are pure (all samples belong to one class).
+    \item \textbf{Impurity Reduction:} Stop when no split reduces impurity.
+    \item \textbf{Minimum Samples:} Stop when the number of samples in a node is below a threshold.
+    \item \textbf{Maximum Depth:} Limit the depth of the tree.
+    \item \textbf{Maximum Nodes:} Limit the total number of nodes in the tree.
+\end{itemize}
+
+\subsection{Bias and Variance in Decision Trees}
+
+\begin{itemize}
+    \item Decision Trees can achieve low bias but often have high variance.
+    \item Overfitting occurs when the tree captures noise instead of underlying patterns.
+\end{itemize}
+
+\subsubsection{Reducing Overfitting}
+
+\begin{itemize}
+    \item \textbf{Early Stopping:}
+    \begin{itemize}
+        \item Limit tree growth using stopping conditions.
+        \item Prevents the tree from becoming too complex.
+    \end{itemize}
+    \item \textbf{Pruning (Post-Pruning):}
+    \begin{itemize}
+        \item Grow a full tree and then remove branches that do not provide significant benefit.
+        \item Compare subtrees based on a cost-complexity metric.
+        \item Prune subtrees if the simplified tree performs as well.
+    \end{itemize}
+\end{itemize}
+
+\subsection{Advantages and Disadvantages of Decision Trees}
+
+\textbf{Advantages:}
+
+\begin{itemize}
+    \item \textbf{Interpretability:} Easy to understand and explain.
+    \item \textbf{Versatility:} Can handle both numerical and categorical data.
+    \item \textbf{Feature Selection:} Performs implicit feature selection.
+    \item \textbf{Invariance:} Not affected by scaling or shifting of data.
+\end{itemize}
+
+\textbf{Disadvantages:}
+
+\begin{itemize}
+    \item \textbf{Overfitting:} Prone to overfitting without proper tuning.
+    \item \textbf{Unstable:} Sensitive to small changes in data (high variance).
+    \item \textbf{Lack of Smoothness:} Predictions are not smooth; decision boundaries are axis-aligned.
+    \item \textbf{Rotation Sensitivity:} Sensitive to rotations in the feature space.
+\end{itemize}
+
+\subsection{Bias-Variance Tradeoff}
+
+\begin{itemize}
+    \item Decision Trees have low bias but high variance.
+    \item Controlling tree complexity can help balance the tradeoff.
+    \item Ensemble methods can reduce variance and improve generalization.
+\end{itemize}
+
+\section{Ensemble Methods}
+
+\subsection{Wisdom of Crowds}
+
+\begin{itemize}
+    \item Aggregating predictions from multiple models can improve accuracy.
+    \item Underlying principle: Errors from individual models may cancel out.
+    \item Effective when models are diverse and errors are uncorrelated.
+\end{itemize}
+
+\subsection{Law of Large Numbers}
+
+\begin{itemize}
+    \item The average of a large number of independent random variables tends toward the expected value.
+    \item In ensembles, averaging predictions reduces variance.
+    \item Mathematically:
+    \[
+    \frac{1}{m} \sum_{i=1}^{m} X_{i} \rightarrow \mathbb{E}[X] \quad \text{as} \quad m \rightarrow \infty
+    \]
+    where \( X_{i} \) are independent and identically distributed random variables.
+\end{itemize}
+
+\subsection{Voting Methods}
+
+\subsubsection{Hard Voting (Majority Rule)}
+
+\begin{itemize}
+    \item Each base learner makes a class prediction.
+    \item The final prediction is the class that receives the majority of votes.
+    \item Suitable when base learners output class labels.
+\end{itemize}
+
+\subsubsection{Soft Voting}
+
+\begin{itemize}
+    \item Base learners provide class probabilities.
+    \item Probabilities are averaged across models.
+    \item The final prediction is the class with the highest average probability.
+    \item Often performs better than hard voting.
+\end{itemize}
+
+\subsection{Reducing Variance with Ensembles}
+
+\begin{itemize}
+    \item Combining multiple models can reduce the variance of predictions.
+    \item The base learners should be diverse and make uncorrelated errors.
+    \item Independence among base learners is ideal but difficult to achieve.
+\end{itemize}
+
+\subsection{Introducing Diversity in Ensembles}
+
+\subsubsection{Diversity in Predictors}
+
+\begin{itemize}
+    \item Use different types of models (heterogeneous ensemble).
+    \item Different algorithms may capture different patterns in the data.
+    \item Example: Combining decision trees, support vector machines, and neural networks.
+\end{itemize}
+
+\subsubsection{Diversity in Training Data}
+
+\begin{itemize}
+    \item Use the same model type but train on different subsets of data.
+    \item Techniques like bootstrapping create varied training sets.
+    \item Helps in creating independent base learners.
+\end{itemize}
+
+\subsection{Bootstrapping}
+
+\begin{itemize}
+    \item Sampling with replacement from the original dataset to create multiple bootstrap samples.
+    \item Each sample is used to train a separate base learner.
+    \item Leads to diversity in the training data.
+\end{itemize}
+
+\subsection{Popular Ensemble Methods}
+
+\begin{itemize}
+    \item \textbf{Bagging (Bootstrap Aggregating):}
+    \begin{itemize}
+        \item Train multiple models on bootstrap samples.
+        \item Average predictions to reduce variance.
+        \item Particularly effective with high-variance models like decision trees.
+    \end{itemize}
+    \item \textbf{Random Forests:}
+    \begin{itemize}
+        \item An extension of bagging applied to decision trees.
+        \item Introduces randomness by selecting a random subset of features at each split.
+        \item Further reduces correlation between base learners.
+    \end{itemize}
+    \item \textbf{Boosting:}
+    \begin{itemize}
+        \item Sequentially trains models, each focusing on correcting errors of the previous one.
+        \item Aims to reduce both bias and variance.
+        \item Examples include AdaBoost and Gradient Boosting.
+    \end{itemize}
+    \item \textbf{Stacking:}
+    \begin{itemize}
+        \item Combines predictions from multiple models using a meta-learner.
+        \item The meta-learner learns how to best combine base learners' predictions.
+    \end{itemize}
+\end{itemize}
+
+\subsection{Conditions for Effective Ensembles}
+
+\begin{itemize}
+    \item Base learners should have low bias.
+    \item Errors among base learners should be uncorrelated.
+    \item Diversity can be introduced through different models or data variations.
+\end{itemize}
+
+\subsection{Limitations of Ensembles}
+
+\begin{itemize}
+    \item Increased computational complexity.
+    \item May reduce interpretability compared to single models.
+    \item Requires careful tuning to balance bias and variance.
+\end{itemize}
+
+\section{Conclusion}
+
+\begin{itemize}
+    \item Decision Trees are simple and interpretable but prone to overfitting.
+    \item Ensemble methods improve performance by combining multiple models.
+    \item Techniques like bagging and boosting leverage different strategies to reduce variance and bias.
+    \item The effectiveness of ensembles depends on the diversity and independence of base learners.
+\end{itemize}
+
+\section{Ensemble Methods (continued): Bagging, Random Forests, and Boosting}
 
 \textbf{Oversimplified TLDR:}
 \begin{itemize}
