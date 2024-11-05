@@ -2769,4 +2769,264 @@ Case 3 & 2.27\% & 0.63\% & 2.20\% & 0.87\% & 0.60\% \\
     \item Proper tuning and consideration of practical aspects are essential for achieving good performance.
 \end{itemize}
 
+\section{Support Vector Machines (SVMs) continued}
+
+\textbf{Oversimplified TLDR:}
+\begin{itemize}
+    \item SVM is a powerful supervised learning algorithm for classification and regression tasks.
+    \item \textbf{Hard-margin SVM:}
+    \begin{itemize}
+        \item Used when data is linearly separable.
+        \item Finds the hyperplane that maximizes the margin between classes.
+        \item Relies on support vectors (data points closest to the decision boundary).
+    \end{itemize}
+    \item \textbf{Soft-margin SVM:}
+    \begin{itemize}
+        \item Handles non-linearly separable data.
+        \item Introduces slack variables to allow some misclassifications.
+        \item Balances maximizing margin and minimizing classification errors.
+    \end{itemize}
+    \item \textbf{Kernel Trick:}
+    \begin{itemize}
+        \item Allows SVM to perform in high-dimensional feature spaces.
+        \item Enables non-linear decision boundaries using kernel functions.
+        \item Computationally efficient without explicitly mapping data to higher dimensions.
+    \end{itemize}
+    \item \textbf{Dual Formulation:}
+    \begin{itemize}
+        \item Reformulates the optimization problem using Lagrange multipliers.
+        \item The solution depends only on inner products between data points.
+        \item Facilitates the use of the kernel trick.
+    \end{itemize}
+\end{itemize}
+
+\subsection{Hard-margin Support Vector Machine}
+
+\begin{itemize}
+    \item Applicable when data is linearly separable.
+    \item Objective: Find the hyperplane that maximizes the margin between two classes.
+    \item The decision boundary is defined as:
+    \[
+    y(\mathbf{x}) = \mathbf{w}^\top \mathbf{x} + b = 0
+    \]
+    where:
+    \begin{itemize}
+        \item $\mathbf{w}$ is the weight vector orthogonal to the hyperplane.
+        \item $b$ is the bias term.
+    \end{itemize}
+    \item The margin is the distance between the hyperplane and the nearest data points (support vectors).
+\end{itemize}
+
+\subsubsection{Optimization Problem}
+
+\begin{itemize}
+    \item Goal: Maximize the margin while ensuring all data points are correctly classified.
+    \item The constraints for correctly classified data points are:
+    \[
+    \begin{cases}
+    \mathbf{w}^\top \mathbf{x}_i + b \geq 1 & \text{if } y_i = +1 \\
+    \mathbf{w}^\top \mathbf{x}_i + b \leq -1 & \text{if } y_i = -1
+    \end{cases}
+    \]
+    \item Combining the constraints:
+    \[
+    y_i (\mathbf{w}^\top \mathbf{x}_i + b) \geq 1, \quad \forall i
+    \]
+    \item The optimization problem becomes:
+    \[
+    \begin{aligned}
+    & \min_{\mathbf{w}, b} \quad \frac{1}{2} \|\mathbf{w}\|^2 \\
+    & \text{subject to} \quad y_i (\mathbf{w}^\top \mathbf{x}_i + b) \geq 1, \quad \forall i
+    \end{aligned}
+    \]
+    \item The factor $\frac{1}{2}$ is included for mathematical convenience.
+\end{itemize}
+
+\subsubsection{Lagrangian and Dual Formulation}
+
+\begin{itemize}
+    \item Introduce Lagrange multipliers $\alpha_i \geq 0$ for each constraint.
+    \item The Lagrangian is:
+    \[
+    L(\mathbf{w}, b, \boldsymbol{\alpha}) = \frac{1}{2} \|\mathbf{w}\|^2 - \sum_{i=1}^n \alpha_i [y_i (\mathbf{w}^\top \mathbf{x}_i + b) - 1]
+    \]
+    \item To find the saddle point, we set the derivatives with respect to $\mathbf{w}$ and $b$ to zero:
+    \[
+    \begin{aligned}
+    \frac{\partial L}{\partial \mathbf{w}} &= \mathbf{w} - \sum_{i=1}^n \alpha_i y_i \mathbf{x}_i = 0 \\
+    \frac{\partial L}{\partial b} &= -\sum_{i=1}^n \alpha_i y_i = 0
+    \end{aligned}
+    \]
+    \item This leads to:
+    \[
+    \mathbf{w} = \sum_{i=1}^n \alpha_i y_i \mathbf{x}_i
+    \]
+    \item Substitute $\mathbf{w}$ back into the Lagrangian to obtain the dual form:
+    \[
+    \begin{aligned}
+    & \max_{\boldsymbol{\alpha}} \quad \sum_{i=1}^n \alpha_i - \frac{1}{2} \sum_{i=1}^n \sum_{j=1}^n \alpha_i \alpha_j y_i y_j (\mathbf{x}_i^\top \mathbf{x}_j) \\
+    & \text{subject to} \quad \alpha_i \geq 0, \quad \sum_{i=1}^n \alpha_i y_i = 0
+    \end{aligned}
+    \]
+    \item The dual problem depends only on the inner products of the data points.
+\end{itemize}
+
+\subsubsection{Decision Function}
+
+\begin{itemize}
+    \item The decision function for classifying a new data point $\mathbf{x}$ is:
+    \[
+    y(\mathbf{x}) = \mathbf{w}^\top \mathbf{x} + b = \left( \sum_{i=1}^n \alpha_i y_i \mathbf{x}_i^\top \mathbf{x} \right) + b
+    \]
+    \item Only data points with $\alpha_i > 0$ (support vectors) contribute to the decision function.
+    \item The bias term $b$ can be computed using any support vector $\mathbf{x}_s$:
+    \[
+    b = y_s - \sum_{i=1}^n \alpha_i y_i \mathbf{x}_i^\top \mathbf{x}_s
+    \]
+\end{itemize}
+
+\subsection{Soft-margin Support Vector Machine}
+
+\begin{itemize}
+    \item Used when data is not linearly separable.
+    \item Introduces slack variables $\xi_i \geq 0$ to allow some misclassifications.
+    \item Balances maximizing the margin and minimizing the classification error.
+\end{itemize}
+
+\subsubsection{Optimization Problem with Slack Variables}
+
+\begin{itemize}
+    \item The constraints become:
+    \[
+    y_i (\mathbf{w}^\top \mathbf{x}_i + b) \geq 1 - \xi_i, \quad \xi_i \geq 0, \quad \forall i
+    \]
+    \item The optimization problem is:
+    \[
+    \begin{aligned}
+    & \min_{\mathbf{w}, b, \boldsymbol{\xi}} \quad \frac{1}{2} \|\mathbf{w}\|^2 + C \sum_{i=1}^n \xi_i \\
+    & \text{subject to} \quad y_i (\mathbf{w}^\top \mathbf{x}_i + b) \geq 1 - \xi_i, \quad \xi_i \geq 0, \quad \forall i
+    \end{aligned}
+    \]
+    \item The hyperparameter $C > 0$ controls the trade-off between maximizing the margin and minimizing the classification error.
+\end{itemize}
+
+\subsubsection{Dual Formulation}
+
+\begin{itemize}
+    \item Introduce Lagrange multipliers $\alpha_i \geq 0$ and $\mu_i \geq 0$.
+    \item The dual problem becomes:
+    \[
+    \begin{aligned}
+    & \max_{\boldsymbol{\alpha}} \quad \sum_{i=1}^n \alpha_i - \frac{1}{2} \sum_{i=1}^n \sum_{j=1}^n \alpha_i \alpha_j y_i y_j (\mathbf{x}_i^\top \mathbf{x}_j) \\
+    & \text{subject to} \quad 0 \leq \alpha_i \leq C, \quad \sum_{i=1}^n \alpha_i y_i = 0
+    \end{aligned}
+    \]
+    \item The upper bound $\alpha_i \leq C$ ensures that the influence of misclassified points is limited.
+\end{itemize}
+
+\subsubsection{Decision Function}
+
+\begin{itemize}
+    \item Similar to the hard-margin case:
+    \[
+    y(\mathbf{x}) = \sum_{i=1}^n \alpha_i y_i \mathbf{x}_i^\top \mathbf{x} + b
+    \]
+    \item Support vectors are data points with $0 < \alpha_i < C$.
+    \item The bias term $b$ can be computed using support vectors that lie exactly on the margin:
+    \[
+    b = y_s - \sum_{i=1}^n \alpha_i y_i \mathbf{x}_i^\top \mathbf{x}_s
+    \]
+    where $\alpha_s \in (0, C)$.
+\end{itemize}
+
+\subsection{Kernel Trick}
+
+\begin{itemize}
+    \item Enables SVM to perform non-linear classification.
+    \item Implicitly maps data into a higher-dimensional feature space where it is linearly separable.
+    \item Kernel function $K(\mathbf{x}_i, \mathbf{x}_j)$ computes the inner product in the feature space without explicit mapping.
+    \item Common kernel functions:
+    \begin{itemize}
+        \item \textbf{Linear Kernel:} $K(\mathbf{x}_i, \mathbf{x}_j) = \mathbf{x}_i^\top \mathbf{x}_j$
+        \item \textbf{Polynomial Kernel:} $K(\mathbf{x}_i, \mathbf{x}_j) = (\gamma \mathbf{x}_i^\top \mathbf{x}_j + r)^d$
+        \item \textbf{Radial Basis Function (RBF) Kernel:} $K(\mathbf{x}_i, \mathbf{x}_j) = \exp(-\gamma \|\mathbf{x}_i - \mathbf{x}_j\|^2)$
+        \item \textbf{Sigmoid Kernel:} $K(\mathbf{x}_i, \mathbf{x}_j) = \tanh(\gamma \mathbf{x}_i^\top \mathbf{x}_j + r)$
+    \end{itemize}
+    \item The decision function using kernels:
+    \[
+    y(\mathbf{x}) = \sum_{i=1}^n \alpha_i y_i K(\mathbf{x}_i, \mathbf{x}) + b
+    \]
+\end{itemize}
+
+\subsection{Dual Representation and Advantages}
+
+\begin{itemize}
+    \item The dual formulation depends only on the inner products (or kernels) between data points.
+    \item Advantages:
+    \begin{itemize}
+        \item Enables the use of the kernel trick.
+        \item Reduces computational complexity for high-dimensional data.
+        \item The number of variables in the dual problem is equal to the number of training samples.
+    \end{itemize}
+\end{itemize}
+
+\subsection{Multi-class Classification with SVM}
+
+\begin{itemize}
+    \item SVMs are inherently binary classifiers.
+    \item Methods to extend SVM for multi-class classification:
+    \begin{itemize}
+        \item \textbf{One-vs-One:}
+        \begin{itemize}
+            \item Train an SVM for every pair of classes.
+            \item Number of classifiers: $\binom{K}{2} = \frac{K(K-1)}{2}$
+            \item Final prediction by majority voting or max-wins strategy.
+        \end{itemize}
+        \item \textbf{One-vs-All:}
+        \begin{itemize}
+            \item Train an SVM to separate each class from all other classes.
+            \item Number of classifiers: $K$
+            \item Final prediction by selecting the class with the highest decision function value.
+        \end{itemize}
+    \end{itemize}
+\end{itemize}
+
+\subsection{Practical Considerations}
+
+\begin{itemize}
+    \item \textbf{Choice of Kernel:}
+    \begin{itemize}
+        \item Depends on the data and problem at hand.
+        \item RBF kernel is a popular choice due to its flexibility.
+        \item Cross-validation can help in selecting the appropriate kernel and its parameters.
+    \end{itemize}
+    \item \textbf{Regularization Parameter $C$:}
+    \begin{itemize}
+        \item Controls the trade-off between maximizing margin and minimizing classification error.
+        \item A large $C$ aims for a smaller margin with fewer misclassifications.
+        \item A small $C$ allows a larger margin with more misclassifications.
+    \end{itemize}
+    \item \textbf{Computational Complexity:}
+    \begin{itemize}
+        \item Training complexity is between $O(n^2)$ and $O(n^3)$, where $n$ is the number of training samples.
+        \item SVMs are not well-suited for very large datasets.
+        \item Techniques like decomposition methods and approximate SVM can be used for large-scale problems.
+    \end{itemize}
+    \item \textbf{Scaling and Preprocessing:}
+    \begin{itemize}
+        \item Feature scaling can improve the performance of SVMs.
+        \item Outliers can significantly affect the SVM, especially with small $C$.
+    \end{itemize}
+\end{itemize}
+
+\subsection{Summary}
+
+\begin{itemize}
+    \item SVMs are powerful classifiers that aim to find the optimal separating hyperplane.
+    \item The use of kernels allows SVMs to perform non-linear classification.
+    \item The dual formulation leverages the kernel trick and depends only on inner products.
+    \item Soft-margin SVMs handle non-separable data by introducing slack variables.
+    \item SVMs can be extended to multi-class problems using strategies like one-vs-one and one-vs-all.
+\end{itemize}
+
 \end{document}
