@@ -3029,4 +3029,902 @@ Case 3 & 2.27\% & 0.63\% & 2.20\% & 0.87\% & 0.60\% \\
     \item SVMs can be extended to multi-class problems using strategies like one-vs-one and one-vs-all.
 \end{itemize}
 
+\section{Gradient Descent (GD)}
+
+\textbf{Oversimplified TLDR:}
+\begin{itemize}
+    \item Gradient Descent is an iterative optimization algorithm to find the minimum of a function.
+    \item It moves in the direction opposite to the gradient (steepest descent).
+    \item Widely used to train machine learning models by minimizing cost functions.
+    \item Key components:
+    \begin{itemize}
+        \item \textbf{Learning Rate ($\alpha$)}: Controls the size of the steps taken towards the minimum.
+        \item \textbf{Gradient}: The vector of partial derivatives indicating the direction of steepest ascent.
+        \item \textbf{Update Rule}: Parameters are updated by moving in the opposite direction of the gradient.
+    \end{itemize}
+    \item Variants include:
+    \begin{itemize}
+        \item \textbf{Batch Gradient Descent}
+        \item \textbf{Stochastic Gradient Descent (SGD)}
+        \item \textbf{Mini-batch Gradient Descent}
+    \end{itemize}
+\end{itemize}
+
+\subsection{Introduction to Optimization}
+
+\begin{itemize}
+    \item Optimization involves finding the best solution from all feasible solutions.
+    \item In machine learning, this typically means minimizing a cost function with respect to model parameters.
+    \item Two main types of optimization methods:
+    \begin{itemize}
+        \item \textbf{Analytical Methods}:
+        \begin{itemize}
+            \item Find closed-form solutions.
+            \item Provide exact solutions but may be computationally expensive or infeasible for large datasets or complex models.
+        \end{itemize}
+        \item \textbf{Numerical Methods}:
+        \begin{itemize}
+            \item Provide approximate solutions within an acceptable tolerance.
+            \item Generally faster and applicable when analytical solutions are not feasible.
+        \end{itemize}
+    \end{itemize}
+\end{itemize}
+
+\subsection{Gradient Descent Algorithm}
+
+\begin{itemize}
+    \item Gradient Descent is a first-order iterative optimization algorithm for finding the minimum of a function.
+    \item It uses the gradient (first derivative) of the function to find the direction of steepest ascent.
+    \item To find the minimum, we move in the opposite direction of the gradient (steepest descent).
+    \item \textbf{Gradient Vector}:
+    \[
+    \nabla f(\boldsymbol{\theta}) = \left[ \frac{\partial f}{\partial \theta_1}, \frac{\partial f}{\partial \theta_2}, \dots, \frac{\partial f}{\partial \theta_m} \right]^\top
+    \]
+    \item \textbf{Update Rule}:
+    \[
+    \boldsymbol{\theta}^{(t+1)} = \boldsymbol{\theta}^{(t)} - \alpha \nabla f(\boldsymbol{\theta}^{(t)})
+    \]
+    where:
+    \begin{itemize}
+        \item $\boldsymbol{\theta}^{(t)}$ are the parameters at iteration $t$.
+        \item $\alpha$ is the learning rate (step size).
+        \item $\nabla f(\boldsymbol{\theta}^{(t)})$ is the gradient evaluated at $\boldsymbol{\theta}^{(t)}$.
+    \end{itemize}
+\end{itemize}
+
+\subsubsection{Learning Rate ($\alpha$)}
+
+\begin{itemize}
+    \item The learning rate controls how big of a step we take in the direction opposite to the gradient.
+    \item If $\alpha$ is too small:
+    \begin{itemize}
+        \item Convergence will be slow.
+    \end{itemize}
+    \item If $\alpha$ is too large:
+    \begin{itemize}
+        \item May overshoot the minimum.
+        \item Can cause divergence or oscillations.
+    \end{itemize}
+    \item Choosing an appropriate learning rate is crucial for the performance of Gradient Descent.
+\end{itemize}
+
+\subsection{Gradient Descent in One Dimension}
+
+\begin{itemize}
+    \item Consider minimizing a simple quadratic function:
+    \[
+    f(\theta) = (\theta - 5)^2
+    \]
+    \item The derivative (gradient) is:
+    \[
+    \frac{\partial f}{\partial \theta} = 2(\theta - 5)
+    \]
+    \item The update rule becomes:
+    \[
+    \theta^{(t+1)} = \theta^{(t)} - \alpha \cdot 2(\theta^{(t)} - 5)
+    \]
+    \item Example with $\alpha = 0.1$ and initial $\theta^{(0)} = 1$:
+    \begin{align*}
+        \theta^{(1)} &= \theta^{(0)} - 0.1 \cdot 2(\theta^{(0)} - 5) = 1 - 0.1 \cdot 2(-4) = 1 + 0.8 = 1.8 \\
+        \theta^{(2)} &= \theta^{(1)} - 0.1 \cdot 2(\theta^{(1)} - 5) = 1.8 - 0.1 \cdot 2(-3.2) = 1.8 + 0.64 = 2.44 \\
+        \theta^{(3)} &= \theta^{(2)} - 0.1 \cdot 2(\theta^{(2)} - 5) = 2.44 - 0.1 \cdot 2(-2.56) = 2.44 + 0.512 = 2.952 \\
+        \vdots \\
+    \end{align*}
+    \item The iterations continue until convergence is achieved.
+\end{itemize}
+
+\subsection{Stopping Criteria}
+
+\begin{itemize}
+    \item Gradient Descent iterates until convergence, but how do we determine when to stop?
+    \item Common stopping criteria:
+    \begin{itemize}
+        \item The magnitude of the gradient falls below a threshold:
+        \[
+        \| \nabla f(\boldsymbol{\theta}^{(t)}) \| < \epsilon
+        \]
+        \item The change in the cost function is below a threshold:
+        \[
+        | f(\boldsymbol{\theta}^{(t+1)}) - f(\boldsymbol{\theta}^{(t)}) | < \epsilon
+        \]
+        \item A maximum number of iterations is reached.
+    \end{itemize}
+    \item Note: The gradient may not reach exactly zero, especially for non-convex functions.
+\end{itemize}
+
+\subsection{Sensitivity to Learning Rate}
+
+\begin{itemize}
+    \item The choice of learning rate $\alpha$ can significantly affect the convergence of Gradient Descent.
+    \item If $\alpha$ is too small, the algorithm will take tiny steps and require many iterations.
+    \item If $\alpha$ is too large, the algorithm may overshoot and diverge.
+    \item Strategies for choosing $\alpha$:
+    \begin{itemize}
+        \item Use a constant small value.
+        \item Implement a learning rate schedule (e.g., decrease $\alpha$ over time).
+        \item Use adaptive learning rates (e.g., methods like AdaGrad, RMSProp).
+    \end{itemize}
+\end{itemize}
+
+\subsection{Gradient Descent in Multiple Dimensions}
+
+\begin{itemize}
+    \item For functions of multiple variables, the gradient is a vector of partial derivatives.
+    \[
+    \nabla f(\boldsymbol{\theta}) = \left[ \frac{\partial f}{\partial \theta_1}, \frac{\partial f}{\partial \theta_2}, \dots, \frac{\partial f}{\partial \theta_p} \right]^\top
+    \]
+    \item The update rule generalizes to:
+    \[
+    \boldsymbol{\theta}^{(t+1)} = \boldsymbol{\theta}^{(t)} - \alpha \nabla f(\boldsymbol{\theta}^{(t)})
+    \]
+    \item Gradient Descent works well for convex functions, where any local minimum is a global minimum.
+    \item For non-convex functions, Gradient Descent may converge to a local minimum.
+\end{itemize}
+
+\subsection{Applying Gradient Descent to Machine Learning Models}
+
+\begin{itemize}
+    \item In machine learning, Gradient Descent is used to minimize the cost (loss) function with respect to model parameters.
+    \item \textbf{Example: Linear Regression}
+    \begin{itemize}
+        \item Model: $\hat{y} = \beta_0 + \beta_1 x$
+        \item Cost function (Mean Squared Error):
+        \[
+        J(\beta) = \frac{1}{n} \sum_{i=1}^{n} (\hat{y}_i - y_i)^2
+        \]
+        \item The optimization objective:
+        \[
+        \min_{\beta} J(\beta)
+        \]
+        \item The cost function is differentiable and convex, ensuring convergence to the global minimum.
+        \item Gradient of the cost function:
+        \[
+        \frac{\partial J}{\partial \beta_0} = \frac{2}{n} \sum_{i=1}^{n} (\hat{y}_i - y_i)
+        \]
+        \[
+        \frac{\partial J}{\partial \beta_1} = \frac{2}{n} \sum_{i=1}^{n} x_i (\hat{y}_i - y_i)
+        \]
+        \item Update rules:
+        \[
+        \beta_0^{(t+1)} = \beta_0^{(t)} - \alpha \frac{2}{n} \sum_{i=1}^{n} (\hat{y}_i^{(t)} - y_i)
+        \]
+        \[
+        \beta_1^{(t+1)} = \beta_1^{(t)} - \alpha \frac{2}{n} \sum_{i=1}^{n} x_i (\hat{y}_i^{(t)} - y_i)
+        \]
+    \end{itemize}
+\end{itemize}
+
+\subsubsection{Simultaneous Parameter Updates}
+
+\begin{itemize}
+    \item Update all parameters simultaneously to ensure consistency:
+    \[
+    \begin{aligned}
+    \beta_{\text{new }0} &= \beta_0 - \alpha \frac{\partial J}{\partial \beta_0} \\
+    \beta_{\text{new }1} &= \beta_1 - \alpha \frac{\partial J}{\partial \beta_1} \\
+    \beta_0 &= \beta_{\text{new }0} \\
+    \beta_1 &= \beta_{\text{new }1}
+    \end{aligned}
+    \]
+\end{itemize}
+
+\subsubsection{Loss and Cost Functions}
+
+\begin{itemize}
+    \item \textbf{Loss Function} $L(\hat{y}_i, y_i)$: Measures the error for a single data point.
+    \item \textbf{Cost Function} $J(\beta)$: The average of the loss over the entire dataset.
+    \[
+    J(\beta) = \frac{1}{n} \sum_{i=1}^{n} L(\hat{y}_i, y_i)
+    \]
+    \item The gradient of the cost function is the average of the gradients of the loss function over all data points:
+    \[
+    \nabla J(\beta) = \frac{1}{n} \sum_{i=1}^{n} \nabla L(\hat{y}_i, y_i)
+    \]
+    \item Therefore, the Gradient Descent update step is:
+    \[
+    \beta^{(t+1)} = \beta^{(t)} - \alpha \nabla J(\beta^{(t)}) = \beta^{(t)} - \alpha \frac{1}{n} \sum_{i=1}^{n} \nabla L(\hat{y}_i^{(t)}, y_i)
+    \]
+\end{itemize}
+
+\subsection{Variants of Gradient Descent}
+
+\begin{itemize}
+    \item \textbf{Batch Gradient Descent}
+    \begin{itemize}
+        \item Uses the entire training dataset to compute the gradient at each step.
+        \item Update rule:
+        \[
+        \beta^{(t+1)} = \beta^{(t)} - \alpha \frac{1}{n} \sum_{i=1}^{n} \nabla L(\hat{y}_i^{(t)}, y_i)
+        \]
+        \item Pros:
+        \begin{itemize}
+            \item Stable convergence for convex functions.
+        \end{itemize}
+        \item Cons:
+        \begin{itemize}
+            \item Computationally expensive for large datasets.
+            \item May cause memory issues.
+        \end{itemize}
+    \end{itemize}
+    \item \textbf{Stochastic Gradient Descent (SGD)}
+    \begin{itemize}
+        \item Updates parameters using one data point at a time.
+        \item Update rule:
+        \[
+        \beta^{(t+1)} = \beta^{(t)} - \alpha \nabla L(\hat{y}_i^{(t)}, y_i)
+        \]
+        \item Pros:
+        \begin{itemize}
+            \item Faster iterations.
+            \item Can escape local minima due to noise.
+        \end{itemize}
+        \item Cons:
+        \begin{itemize}
+            \item May fluctuate and not converge to the exact minimum.
+        \end{itemize}
+        \item Often repeated over epochs, where one epoch equals $n$ iterations (the size of the dataset).
+    \end{itemize}
+    \item \textbf{Mini-batch Gradient Descent}
+    \begin{itemize}
+        \item Compromise between Batch GD and SGD.
+        \item Uses a small batch of data points (mini-batch) to compute the gradient.
+        \item Update rule:
+        \[
+        \beta^{(t+1)} = \beta^{(t)} - \alpha \frac{1}{|S|} \sum_{i \in S} \nabla L(\hat{y}_i^{(t)}, y_i)
+        \]
+        where $S$ is the mini-batch.
+        \item Pros:
+        \begin{itemize}
+            \item Faster than Batch GD.
+            \item More stable convergence than SGD.
+        \end{itemize}
+    \end{itemize}
+\end{itemize}
+
+\subsection{Practical Considerations}
+
+\begin{itemize}
+    \item \textbf{Convergence}
+    \begin{itemize}
+        \item Gradient Descent converges to a global minimum for convex functions.
+        \item For non-convex functions, it may converge to a local minimum.
+    \end{itemize}
+    \item \textbf{Non-Convex Functions}
+    \begin{itemize}
+        \item Optimization landscape may have multiple local minima and saddle points.
+        \item Variants like SGD and Mini-batch GD can help in escaping local minima due to their stochastic nature.
+    \end{itemize}
+    \item \textbf{Choosing Learning Rate}
+    \begin{itemize}
+        \item Experiment with different values.
+        \item Use techniques like learning rate decay or adaptive learning rates.
+    \end{itemize}
+    \item \textbf{Feature Scaling}
+    \begin{itemize}
+        \item Scaling features can improve convergence speed.
+        \item Methods include normalization and standardization.
+    \end{itemize}
+    \item \textbf{Initialization}
+    \begin{itemize}
+        \item Randomly initialize parameters.
+        \item Proper initialization can affect convergence and avoid getting stuck in poor local minima.
+    \end{itemize}
+    \item \textbf{Regularization}
+    \begin{itemize}
+        \item Techniques like L1 or L2 regularization can prevent overfitting.
+        \item Added to the cost function to penalize large weights.
+    \end{itemize}
+\end{itemize}
+
+\subsection{Extensions and Advanced Topics}
+
+\begin{itemize}
+    \item \textbf{Momentum}
+    \begin{itemize}
+        \item Accelerates Gradient Descent by adding a fraction of the update vector of the past time step to the current update.
+        \item Update rule with momentum:
+        \[
+        \begin{aligned}
+        v^{(t)} &= \gamma v^{(t-1)} + \alpha \nabla J(\beta^{(t)}) \\
+        \beta^{(t+1)} &= \beta^{(t)} - v^{(t)}
+        \end{aligned}
+        \]
+        where $\gamma$ is the momentum term (typically between 0 and 1).
+    \end{itemize}
+    \item \textbf{Adaptive Learning Rates}
+    \begin{itemize}
+        \item Methods like AdaGrad, RMSProp, and Adam adjust the learning rate during training based on past gradients.
+        \item \textbf{Adam} (Adaptive Moment Estimation) combines momentum and adaptive learning rates.
+    \end{itemize}
+    \item \textbf{Second-Order Methods}
+    \begin{itemize}
+        \item Utilize second derivatives (Hessian matrix) for optimization.
+        \item Examples include Newton's Method and Quasi-Newton methods (e.g., BFGS).
+        \item Converge faster but are computationally expensive due to the calculation of the Hessian.
+    \end{itemize}
+\end{itemize}
+
+\subsection{Summary}
+
+\begin{itemize}
+    \item Gradient Descent is a fundamental algorithm in optimization and machine learning.
+    \item Understanding its mechanics and variations is crucial for training effective models.
+    \item Practical implementation requires careful consideration of learning rates, convergence criteria, and data characteristics.
+\end{itemize}
+
+\section{A Simple Artificial Neural Network (ANN) with a Hidden Layer}
+
+\textbf{Oversimplified TLDR:}
+\begin{itemize}
+    \item Artificial Neural Networks (ANNs) are computational models inspired by biological neural networks.
+    \item A typical ANN consists of layers of neurons: an input layer, one or more hidden layers, and an output layer.
+    \item Each neuron computes a weighted sum of its inputs, adds a bias, and passes the result through an activation function.
+    \item The hidden layer(s) enable the network to learn non-linear decision boundaries, allowing more complex tasks to be performed.
+    \item Training involves adjusting weights (and biases) via Gradient Descent (or its variants) using a process called back-propagation.
+\end{itemize}
+
+\subsection{Introduction to Artificial Neural Networks}
+
+\begin{itemize}
+    \item \textbf{Biological Inspiration:} Neurons in the human brain receive signals via dendrites, process them in the cell body (soma), and transmit an output via the axon. ANNs mimic this structure in a simplified computational form.
+    \item \textbf{Historical Context:}
+    \begin{itemize}
+        \item Early neural network models (like the perceptron) appeared in the 1940s and 1950s.
+        \item Interest waned in the 1970s, but was revived in the 2000s and 2010s (often called ``deep learning'') due to increased computational power and large datasets.
+    \end{itemize}
+    \item \textbf{Real-World Examples:}
+    \begin{itemize}
+        \item Image classification (e.g., recognizing handwritten digits, detecting objects in photographs).
+        \item Natural language processing (e.g., spam detection, sentiment analysis).
+        \item Regression tasks (e.g., predicting house prices, forecasting stock prices).
+    \end{itemize}
+\end{itemize}
+
+\subsection{Structure of a Simple ANN}
+
+\begin{itemize}
+    \item A simple ANN typically has:
+    \begin{itemize}
+        \item One \textbf{input layer}, which directly outputs the input values (no activation function).
+        \item One or more \textbf{hidden layers}, each consisting of several neurons with non-linear activation functions (e.g., sigmoid, tanh, ReLU).
+        \item An \textbf{output layer}, whose activation function is chosen based on the task (e.g., linear for regression, sigmoid for binary classification, softmax for multi-class classification).
+    \end{itemize}
+    \item \textbf{Forward Pass:} For a given input vector $\mathbf{x}$, signals travel through the layers until an output $\mathbf{a}^{(o)}$ is computed.
+    \item \textbf{Parameters:} All the weights and biases in the network are the trainable parameters.
+\end{itemize}
+
+\subsection{Universal Approximation Theorem (Informal)}
+
+\begin{itemize}
+    \item Under mild assumptions, a neural network with at least one hidden layer and a sufficient (finite) number of neurons can approximate any continuous function to a desired accuracy.
+    \item Non-linear activation functions (e.g., sigmoid, ReLU) are crucial; if the activation were purely linear, the network would only represent linear transformations regardless of the depth.
+\end{itemize}
+
+\subsection{Forward Pass Equations}
+
+\subsubsection{One Hidden Layer Network}
+
+Suppose we have an input layer of size $d$, a hidden layer of size $m$, and an output layer of size $k$.
+
+\textbf{Hidden layer computation:}
+
+\[
+\mathbf{z}^{(h)} = \mathbf{x} W^{(h)} + \mathbf{b}^{(h)}
+\quad,\quad
+\mathbf{a}^{(h)} = f(\mathbf{z}^{(h)})
+\]
+
+where:
+\begin{itemize}
+    \item $\mathbf{x}$ is the input row vector of dimension $1 \times d$.
+    \item $W^{(h)}$ is a $d \times m$ weight matrix for the hidden layer.
+    \item $\mathbf{b}^{(h)}$ is a $1 \times m$ bias row vector.
+    \item $f(\cdot)$ is an element-wise non-linear activation function (e.g., $\sigma, \tanh, \mathrm{ReLU}$).
+    \item $\mathbf{a}^{(h)}$ is the output of the hidden layer (dimension $1 \times m$).
+\end{itemize}
+
+\textbf{Output layer computation:}
+
+\[
+\mathbf{z}^{(o)} = \mathbf{a}^{(h)} W^{(o)} + \mathbf{b}^{(o)}
+\quad,\quad
+\mathbf{a}^{(o)} = g(\mathbf{z}^{(o)})
+\]
+
+where:
+\begin{itemize}
+    \item $W^{(o)}$ is an $m \times k$ weight matrix for the output layer.
+    \item $\mathbf{b}^{(o)}$ is a $1 \times k$ bias row vector.
+    \item $g(\cdot)$ is the output-layer activation function (linear, sigmoid, softmax, etc.).
+    \item $\mathbf{a}^{(o)}$ is the final output (dimension $1 \times k$).
+\end{itemize}
+
+\subsubsection{Loss Function}
+
+\begin{itemize}
+    \item For \textbf{regression tasks}, a common choice is the Mean Squared Error (MSE):
+    \[
+    L\bigl(\mathbf{a}^{(o)}, y\bigr) = \frac{1}{2}\bigl(y - \mathbf{a}^{(o)}\bigr)^2
+    \]
+    \item For \textbf{binary classification}, a common choice is the Binary Cross-Entropy (Log Loss):
+    \[
+    L\bigl(\mathbf{a}^{(o)}, y\bigr)
+    = -\Bigl[y \cdot \log\bigl(\mathbf{a}^{(o)}\bigr) + (1-y)\cdot \log\bigl(1 - \mathbf{a}^{(o)}\bigr)\Bigr]
+    \]
+    \item For \textbf{multi-class classification}, the Softmax cross-entropy loss is often used:
+    \[
+    L\bigl(\mathbf{a}^{(o)}, y\bigr)
+    = -\sum_{i=1}^{k} y_i \cdot \log\bigl(a_i^{(o)}\bigr)
+    \quad \text{where } \mathbf{a}^{(o)} \text{ is computed via Softmax.}
+    \]
+\end{itemize}
+
+\subsection{Training the ANN}
+
+\begin{itemize}
+    \item \textbf{Goal:} Find the set of weights and biases that minimize the chosen loss function over the training dataset.
+    \item \textbf{Process:}
+    \begin{enumerate}
+        \item \textbf{Initialization:} Randomly initialize all weights and biases.
+        \item \textbf{Forward Pass:} For each training sample $(\mathbf{x}, y)$, compute the output $\mathbf{a}^{(o)}$ and loss $L(\mathbf{a}^{(o)}, y)$.
+        \item \textbf{Backward Pass (Back-Propagation):} 
+        \begin{itemize}
+            \item Compute partial derivatives of the loss w.r.t. the parameters by applying the chain rule from the output layer back toward the input layer.
+        \end{itemize}
+        \item \textbf{Gradient Descent Update:}
+        \[
+        W_{(t+1)} = W_{(t)} - \alpha \, \nabla_W L, 
+        \quad
+        b_{(t+1)} = b_{(t)} - \alpha \, \nabla_b L
+        \]
+        where $\alpha$ is the learning rate.
+    \end{enumerate}
+\end{itemize}
+
+\subsection{Example: Binary Classification with One Hidden Layer}
+
+\begin{itemize}
+    \item \textbf{Network Architecture:}
+    \begin{itemize}
+        \item Input layer: $\mathbf{x}$ of dimension $d$
+        \item Hidden layer with $m$ neurons and sigmoid activation $\sigma(z) = \frac{1}{1+e^{-z}}$
+        \item Output layer with 1 neuron (also using a sigmoid activation) to produce an output in $(0,1)$
+    \end{itemize}
+    \item \textbf{Loss Function (Cross-Entropy):}
+    \[
+    L\bigl(a^{(o)}, y\bigr)
+    = -\Bigl[y\log\bigl(a^{(o)}\bigr) + (1-y)\log\bigl(1 - a^{(o)}\bigr)\Bigr]
+    \]
+    \item \textbf{Forward Pass Equations:}
+
+    \[
+    \begin{aligned}
+    \mathbf{z}^{(h)} &= \mathbf{x}W^{(h)} + \mathbf{b}^{(h)}, 
+    & \mathbf{a}^{(h)} &= \sigma\bigl(\mathbf{z}^{(h)}\bigr),
+    \\
+    \mathbf{z}^{(o)} &= \mathbf{a}^{(h)}W^{(o)} + \mathbf{b}^{(o)}, 
+    & a^{(o)} &= \sigma\bigl(\mathbf{z}^{(o)}\bigr).
+    \end{aligned}
+    \]
+
+    \item \textbf{Backward Pass (Conceptual):}
+    \begin{itemize}
+        \item Compute $\frac{\partial L}{\partial a^{(o)}}$, $\frac{\partial L}{\partial \mathbf{z}^{(o)}}$, and then $\frac{\partial L}{\partial W^{(o)}}$, $\frac{\partial L}{\partial \mathbf{b}^{(o)}}$.
+        \item Propagate the error back to the hidden layer: $\frac{\partial L}{\partial \mathbf{a}^{(h)}}$, $\frac{\partial L}{\partial \mathbf{z}^{(h)}}$, and then $\frac{\partial L}{\partial W^{(h)}}$, $\frac{\partial L}{\partial \mathbf{b}^{(h)}}$.
+        \item Update the parameters: 
+        \[
+        W^{(o)} \leftarrow W^{(o)} - \alpha \frac{\partial L}{\partial W^{(o)}},
+        \quad
+        b^{(o)} \leftarrow b^{(o)} - \alpha \frac{\partial L}{\partial b^{(o)}} \quad \text{(similarly for } W^{(h)}\text{, }b^{(h)}\text{).}
+        \]
+    \end{itemize}
+\end{itemize}
+
+\subsection{Intuitive Explanation}
+
+\begin{itemize}
+    \item \textbf{Hidden Layer Function:} The hidden layer allows the network to transform inputs into intermediate representations. Non-linear activations help capture more complex patterns than a single linear transformation would.
+    \item \textbf{Error Signal:} The difference between the predicted output and the true label guides how to update each weight. If the prediction is too high or too low, the gradient indicates how to adjust each parameter.
+    \item \textbf{Learning Rate:} Controls the size of these updates. Too large can cause divergence; too small can slow learning.
+    \item \textbf{Why Sigmoid for Binary Classification?} The sigmoid outputs a value between 0 and 1, naturally interpreting it as a probability for the positive class. 
+\end{itemize}
+
+\subsection{Real-World Use Case}
+
+\begin{itemize}
+    \item \textbf{Spam Detection:} 
+    \begin{itemize}
+        \item Input layer: Email features (e.g., word counts, presence of suspicious links).
+        \item Hidden layer: Captures non-linear relationships in the text features.
+        \item Output layer: Sigmoid activation to predict the probability of ``spam'' (1) vs. ``not spam'' (0).
+        \item Loss Function: Binary Cross-Entropy.
+        \item Training: Adjust weights via back-propagation on a large dataset of labeled emails.
+    \end{itemize}
+\end{itemize}
+
+\subsection{Summary}
+
+\begin{itemize}
+    \item An ANN with a hidden layer can learn non-linear relationships.
+    \item Choosing appropriate activation functions and a suitable loss function is crucial for performance.
+    \item Training is done by Gradient Descent and back-propagation:
+    \begin{itemize}
+        \item Forward pass computes the output for each training sample.
+        \item Backward pass uses chain rule to compute gradients w.r.t. the weights and biases.
+        \item Parameters are updated to reduce the loss.
+    \end{itemize}
+    \item Despite their simplicity, single-hidden-layer ANNs can approximate a wide range of functions (Universal Approximation Theorem).
+    \item Additional hidden layers (deep networks) can further improve representational power.
+\end{itemize}
+
+\section{ANN with Softmax Output Layer and Regularization}
+
+\textbf{Oversimplified TLDR:}
+\begin{itemize}
+    \item When dealing with multiple classes, the \textbf{softmax} activation function is often used in the output layer.
+    \item Regularization methods (e.g., L2 weight decay, dropout, early stopping, data augmentation) help prevent overfitting and improve generalization.
+    \item Advanced optimization variants (momentum, Nesterov accelerated gradient, RMSProp, Adam) can speed up and stabilize training.
+    \item Frameworks like \textbf{Keras/TensorFlow} offer high-level APIs for rapid development and experimentation.
+\end{itemize}
+
+\subsection{Softmax Output for Multi-Class Classification}
+
+\begin{itemize}
+    \item \textbf{Softmax Definition:} Converts logits (real-valued outputs) into a probability distribution. For a given output vector $\mathbf{z}^{(o)} = [z_1^{(o)}, z_2^{(o)},\ldots, z_C^{(o)}]$, the softmax function produces:
+    \[
+    a_{c}^{(o)} 
+    = \frac{e^{z_{c}^{(o)}}}{\sum_{k=1}^{C} e^{z_{k}^{(o)}}}
+    \quad,\quad c = 1,\ldots, C,
+    \]
+    where $C$ is the number of classes.
+    \item \textbf{Cross-Entropy Loss (Multi-Class)}:
+    \[
+    L\bigl(\mathbf{a}^{(o)}, \mathbf{y}\bigr)
+    = -\sum_{c=1}^{C} y_c \,\log\bigl(a_{c}^{(o)}\bigr),
+    \]
+    where $\mathbf{y}$ is a one-hot encoded label vector.
+\end{itemize}
+
+\subsubsection{Partial Derivatives}
+
+\begin{itemize}
+    \item For each class $c$, 
+    \[
+    \frac{\partial L}{\partial z_{c}^{(o)}}
+    = a_{c}^{(o)} - y_{c}.
+    \]
+    \item Parameter updates for output layer weights $w_{j,c}^{(o)}$ and biases $b_{c}^{(o)}$ follow:
+    \[
+    \frac{\partial L}{\partial w_{j,c}^{(o)}} 
+    = \bigl(a_{c}^{(o)} - y_c\bigr)\, a_{j}^{(h)}
+    \quad,\quad
+    \frac{\partial L}{\partial b_{c}^{(o)}}
+    = a_{c}^{(o)} - y_c.
+    \]
+    \item Errors are then back-propagated to the hidden layer:
+    \[
+    \frac{\partial L}{\partial a_{j}^{(h)}}
+    = \sum_{c=1}^{C} \Bigl(\frac{\partial L}{\partial z_{c}^{(o)}} \cdot \frac{\partial z_{c}^{(o)}}{\partial a_{j}^{(h)}}\Bigr)
+    \quad,\quad
+    \frac{\partial L}{\partial z_{j}^{(h)}}
+    = \frac{\partial L}{\partial a_{j}^{(h)}} \cdot \frac{\partial a_{j}^{(h)}}{\partial z_{j}^{(h)}}.
+    \]
+    \item Hidden weights and biases update similarly, using
+    \[
+    \frac{\partial L}{\partial w_{i,j}^{(h)}} 
+    = \frac{\partial L}{\partial z_{j}^{(h)}} \cdot x_i
+    \quad,\quad
+    \frac{\partial L}{\partial b_{j}^{(h)}} 
+    = \frac{\partial L}{\partial z_{j}^{(h)}}.
+    \]
+\end{itemize}
+
+\subsection{Regularization Methods in ANNs}
+
+\subsubsection{Weight Decay (L2 Regularization)}
+
+\begin{itemize}
+    \item \textbf{Idea:} Penalize large weights to reduce model complexity.
+    \item \textbf{Loss Function with L2 Penalty:}
+    \[
+    Q(\mathbf{W}) + \frac{\lambda}{2}\,\|\mathbf{W}\|_{2}^{2},
+    \]
+    where $Q(\mathbf{W})$ is the original loss (e.g., cross-entropy), $\mathbf{W}$ the collection of weights, and $\lambda$ the regularization coefficient.
+    \item \textbf{Gradient Descent Update:} 
+    \[
+    \mathbf{W}_{t+1} = \mathbf{W}_t \;-\;\alpha \nabla_{\mathbf{W}} Q(\mathbf{W}_t)\;-\;\lambda\,\mathbf{W}_t.
+    \]
+\end{itemize}
+
+\subsubsection{Dropout}
+
+\begin{itemize}
+    \item \textbf{Idea:} Randomly ``drop'' (disable) neurons during training with a certain probability (keep-prob).
+    \item \textbf{Effect:} Forces the network to learn redundant representations, reducing overfitting. 
+    \item \textbf{Implementation Detail:} 
+    \begin{itemize}
+        \item During training, each neuron's output is multiplied by a random mask of 0's (drop) and 1's (keep).
+        \item In \textbf{inverted dropout}, outputs are scaled up by $\frac{1}{(\text{keep-prob})}$, so no scaling is needed at inference.
+    \end{itemize}
+    \item \textbf{At Inference:} All neurons are used without random drops.
+\end{itemize}
+
+\subsubsection{Early Stopping}
+
+\begin{itemize}
+    \item Monitor validation loss (or accuracy) over epochs.
+    \item Stop training when the validation loss stops improving (or starts to worsen) to avoid overfitting.
+\end{itemize}
+
+\subsubsection{Data Augmentation}
+
+\begin{itemize}
+    \item \textbf{Idea:} Increase effective training set size by applying random transformations (e.g., rotations, flips, noise) to the existing data.
+    \item Commonly used in image processing, but also applicable in other domains (e.g., text augmentation, audio augmentation).
+    \item Helps the model learn robust features and generalize better.
+\end{itemize}
+
+\subsection{Variants of Gradient Descent}
+
+\begin{itemize}
+    \item \textbf{Momentum:} 
+    \[
+    \begin{aligned}
+    v_{t+1} &= \beta \, v_{t} \;+\;\alpha\, \nabla L(\mathbf{W}_t),\\
+    \mathbf{W}_{t+1} &= \mathbf{W}_t \;-\; v_{t+1},
+    \end{aligned}
+    \]
+    where $v_t$ accumulates a history of gradients to accelerate movement in consistent directions.
+    \item \textbf{Nesterov Accelerated Gradient (NAG):} 
+    \[
+    \begin{aligned}
+    v_{t+1} &= \beta \, v_{t} \;+\;\alpha\, \nabla L(\mathbf{W}_t + \beta\,v_t),\\
+    \mathbf{W}_{t+1} &= \mathbf{W}_t \;-\; v_{t+1},
+    \end{aligned}
+    \]
+    which looks ahead before updating momentum.
+    \item \textbf{Other Optimizers (Brief Mention):} Adagrad, Adadelta, RMSProp, Adam. These adjust learning rates automatically per parameter.
+\end{itemize}
+
+\subsection{Practical Example with Keras/TensorFlow}
+
+\begin{itemize}
+    \item \textbf{Model Definition:}
+    \begin{verbatim}
+    classifier = tf.keras.Sequential(name='my_model')
+    classifier.add(tf.keras.Input(shape=(784,)))
+    classifier.add(tf.keras.layers.Dense(10, activation='relu'))
+    classifier.add(tf.keras.layers.Dense(1, activation='sigmoid'))
+    \end{verbatim}
+    \item \textbf{Compilation:}
+    \begin{verbatim}
+    classifier.compile(loss='binary_crossentropy',
+                       optimizer=tf.keras.optimizers.SGD(learning_rate=0.01),
+                       metrics=['accuracy'])
+    \end{verbatim}
+    \item \textbf{Fitting:}
+    \begin{verbatim}
+    history = classifier.fit(x_train, y_train,
+                             epochs=150,
+                             batch_size=x_train.shape[0],
+                             verbose=0)
+    \end{verbatim}
+    \item \textbf{Regularization in Code Example:} 
+    \begin{itemize}
+        \item \texttt{tf.keras.layers.Dropout(rate)} introduces dropout with a specified drop probability.
+        \item L2 weight decay can be added via \texttt{kernel\_regularizer} in \texttt{Dense} layers.
+        \item Early stopping can be integrated via \texttt{tf.keras.callbacks.EarlyStopping}.
+    \end{itemize}
+\end{itemize}
+
+\subsection{Intuitive and Real-World Perspective}
+
+\begin{itemize}
+    \item \textbf{Why Softmax?} 
+    \begin{itemize}
+        \item In multi-class tasks (e.g., classifying digits 0--9), we want a probability distribution over possible classes.
+        \item The largest probability in the softmax output is chosen as the predicted class.
+    \end{itemize}
+    \item \textbf{Regularization in Practice:}
+    \begin{itemize}
+        \item \textbf{Dropout:} Encourages each neuron to not rely on specific other neurons, yielding more robust features (akin to an ensemble of sub-networks).
+        \item \textbf{Early Stopping:} Prevents training for so long that the model memorizes the training set noise.
+        \item \textbf{Data Augmentation:} Particularly impactful in image recognition tasks (e.g., \textit{ImageNet}, \textit{MNIST}) to artificially enlarge the dataset.
+    \end{itemize}
+    \item \textbf{Real-World Example: Image Classification}
+    \begin{itemize}
+        \item \textbf{Task:} Identifying objects in photos among many categories (dogs, cats, cars, etc.).
+        \item \textbf{Softmax Output:} Probability of each category is returned; the top score is the predicted label.
+        \item \textbf{Regularization:} 
+            \begin{itemize}
+                \item \textit{Dropout} to ensure the network generalizes across diverse features.
+                \item \textit{Data Augmentation} (flip, rotate, zoom images) to simulate more training data.
+                \item \textit{Weight Decay} to avoid overly large parameter values that overfit the training set.
+            \end{itemize}
+    \end{itemize}
+\end{itemize}
+
+\subsection{Summary}
+
+\begin{itemize}
+    \item The \textbf{softmax output layer} is key for multi-class classification, returning a probability distribution over classes.
+    \item \textbf{Regularization} (weight decay, dropout, early stopping, data augmentation) helps control overfitting, which is especially crucial for deep ANNs.
+    \item More \textbf{advanced optimizers} provide faster convergence and better performance in practice.
+    \item Building ANN models in frameworks like TensorFlow/Keras allows us to quickly test, tune, and deploy models for real-world use cases.
+\end{itemize}
+
+\section{Deep Network Challenges and Convolutional Neural Networks}
+
+\textbf{Oversimplified TLDR:}
+\begin{itemize}
+    \item \textbf{Weight Initialization:} If weights in the same layer are all identical, we lose diversity of neuron behavior (symmetry problem). Proper initialization heuristics (e.g., Xavier, He) reduce vanishing/exploding gradients.
+    \item \textbf{Vanishing/Exploding Gradients:} In very deep networks, gradients can become extremely small (vanish) or extremely large (explode), hindering stable training.
+    \item \textbf{Activation Functions:} Sigmoid and tanh can cause vanishing gradients. ReLU is more robust but can ``die'' for negative inputs. Leaky ReLU mitigates this.
+    \item \textbf{CNNs:} Convolutional Neural Networks preserve spatial information in images via filters/kernels, pooling layers, and typically fewer parameters than fully connected models.
+\end{itemize}
+
+\subsection{Weight Initialization and Symmetry Problem}
+\begin{itemize}
+    \item \textbf{Symmetry Problem:} Initializing all weights in a layer to the same value causes identical updates for each neuron, preventing diverse feature extraction.
+    \item \textbf{Bias Initialization:} Usually acceptable to initialize all biases to zero. Biases shift activation functions without breaking symmetry in the same way.
+    \item \textbf{Guidelines for Weight Initialization:}
+    \begin{itemize}
+        \item \textbf{Xavier (Glorot) Initialization:} 
+        \[
+        w_{i,j} \sim \mathcal{N}\!\bigl(0,\,\sigma^2\bigr), 
+        \quad 
+        \sigma^2 = \frac{1}{n_{\text{avg}}}, 
+        \quad
+        n_{\text{avg}} = \tfrac{1}{2}\bigl(n_{\text{in}} + n_{\text{out}}\bigr).
+        \]
+        \item \textbf{He Initialization:} 
+        \[
+        \sigma^2 = \frac{2}{n_{\text{avg}}},
+        \]
+        often recommended for ReLU-type activations.
+    \end{itemize}
+\end{itemize}
+
+\subsection{Vanishing and Exploding Gradients in Deep Networks}
+
+\subsubsection{Vanishing Gradients}
+\begin{itemize}
+    \item \textbf{Definition:} The magnitude of gradients becomes extremely small in deeper layers, causing negligible weight updates.
+    \item \textbf{Why It Happens:}
+    \begin{itemize}
+        \item \textbf{Sigmoid/Tanh Saturation:} For large positive/negative inputs, the derivative is near zero.
+        \item Deep products of small derivatives compound (chain rule), leading to near-zero gradients in early layers.
+    \end{itemize}
+    \item \textbf{Consequence:} The earliest layers (closest to input) barely train, limiting representation learning.
+\end{itemize}
+
+\subsubsection{Exploding Gradients}
+\begin{itemize}
+    \item \textbf{Definition:} Gradient values grow exponentially through back-propagation, potentially causing numerical instability (NaN or infinite values).
+    \item \textbf{Why It Happens:}
+    \begin{itemize}
+        \item Large weight magnitudes and repeated multiplications can amplify gradients.
+        \item Deep products of derivatives greater than 1 explode exponentially.
+    \end{itemize}
+    \item \textbf{Consequence:} Training becomes unstable, and weight updates can overshoot the loss minimum.
+\end{itemize}
+
+\subsection{Activation Functions in Hidden Layers}
+\begin{itemize}
+    \item \textbf{Sigmoid:} 
+    \[
+    f(x) = \frac{1}{1 + e^{-x}}.
+    \]
+    \begin{itemize}
+        \item Saturates at 0 or 1, leading to small gradients (vanishing problem).
+        \item Computationally more expensive (involves exponentials).
+    \end{itemize}
+    \item \textbf{Tanh:}
+    \[
+    f(x) = \tanh(x) = \frac{e^{x} - e^{-x}}{e^{x} + e^{-x}}.
+    \]
+    \begin{itemize}
+        \item Ranges from -1 to 1, can still saturate and cause vanishing.
+        \item Derivatives are steeper than sigmoid, but the issue persists for large $|x|$.
+    \end{itemize}
+    \item \textbf{ReLU:}
+    \[
+    f(x) = \max(0,\,x).
+    \]
+    \begin{itemize}
+        \item Faster computation: if $x > 0$, derivative is 1; if $x < 0$, derivative is 0.
+        \item \textbf{Dying ReLU Problem:} Once a neuron's weights cause negative inputs, its gradient becomes 0 forever.
+    \end{itemize}
+    \item \textbf{Leaky ReLU:}
+    \[
+    f(x) = 
+    \begin{cases}
+       x & \text{if } x \ge 0,\\
+       \alpha x & \text{if } x < 0,
+    \end{cases}
+    \]
+    where $0 < \alpha \ll 1$. This alleviates the dying ReLU issue by maintaining a small slope for negative inputs.
+\end{itemize}
+
+\subsection{Convolutional Neural Networks (CNNs)}
+
+\subsubsection{Motivation and Overview}
+\begin{itemize}
+    \item \textbf{Spatial Structure in Images:} Flattening a 2D image into a 1D vector loses crucial local information. Fully connected layers are often large and prone to overfitting.
+    \item \textbf{Convolutions:} Enable local feature extraction with fewer parameters by applying small filters (kernels) that learn localized patterns (edges, corners, textures).
+    \item \textbf{Multi-Channel Inputs/Outputs:} Images can have multiple channels (RGB), and convolutional layers often learn multiple filters (output channels) to detect diverse features.
+\end{itemize}
+
+\subsubsection{Convolution Operation}
+\begin{itemize}
+    \item \textbf{Definition (2D Case):} For a filter of size $k \times k$ slid over an image:
+    \[
+    \text{ConvOutput}[i,j] 
+    = \sum_{p=0}^{k-1} \sum_{q=0}^{k-1} \bigl(\text{Image}[i+p,\, j+q]\bigr)\,\bigl(\text{Filter}[p,\,q]\bigr).
+    \]
+    \item \textbf{Padding:} 
+    \begin{itemize}
+        \item \textit{Valid Padding}: No extra border; output is smaller than input.
+        \item \textit{Same Padding}: Add zeros around the image so the output dimension remains unchanged.
+    \end{itemize}
+    \item \textbf{Stride:} The step size for shifting the filter. A larger stride downsamples the feature map more aggressively.
+\end{itemize}
+
+\subsubsection{Pooling}
+\begin{itemize}
+    \item \textbf{Purpose:} Downsample the feature map to reduce dimensionality and control overfitting.
+    \item \textbf{Max-Pooling:} Takes the maximum value in each local region (often more effective in practice than average-pooling).
+    \item \textbf{Example:} $2\times 2$ max-pooling picks the largest value in each $2\times 2$ block.
+\end{itemize}
+
+\subsubsection{CNN Architecture}
+\begin{itemize}
+    \item \textbf{Feature Extraction:} Stacks of convolution + activation + pooling capture patterns at multiple scales, from simple edges to complex shapes.
+    \item \textbf{Classification Stage:} Flatten the final feature maps into a vector and pass through fully connected layers, commonly ending with a softmax (for multi-class tasks).
+\end{itemize}
+
+\subsection{Intuitive Explanation and Real-World Examples}
+\begin{itemize}
+    \item \textbf{Weight Initialization:} Good initialization ensures that signals (and gradients) neither vanish nor explode across layers, especially in deep networks.
+    \item \textbf{Vanishing/Exploding Gradients:} 
+    \begin{itemize}
+        \item \textit{Vanishing} leads to slow or no learning in early layers. 
+        \item \textit{Exploding} leads to instability or NaN values.
+    \end{itemize}
+    \item \textbf{Convolutional Networks in Practice:}
+    \begin{itemize}
+        \item Commonly used in \textit{image classification}, \textit{object detection}, \textit{medical image analysis}, and more.
+        \item Each convolutional filter learns specialized features (e.g., edges, textures). Pooling reduces spatial resolution while retaining the most important information.
+    \end{itemize}
+\end{itemize}
+
+\subsection{Summary}
+\begin{itemize}
+    \item \textbf{Weight Initialization:} Diversify neuron starting points and maintain stable gradient flow with heuristics like Xavier or He.
+    \item \textbf{Deep Network Pitfalls:} Vanishing and exploding gradients are major challenges, especially when using saturating activations like sigmoid.
+    \item \textbf{Recommended Activations:} ReLU or variants (e.g., leaky ReLU) are preferred in many modern architectures to mitigate vanishing gradient issues.
+    \item \textbf{Convolutional Neural Networks:} Harness local patterns, reduce parameters, and preserve spatial structure. Pooling layers further downsample intermediate feature maps for efficient and robust image understanding.
+    \item \textbf{Practical Importance:} Weight initialization, activation choice, and CNN design are cornerstones for building successful deep learning models in computer vision and beyond.
+\end{itemize}
+
 \end{document}
